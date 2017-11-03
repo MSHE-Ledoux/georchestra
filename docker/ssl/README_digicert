@@ -1,0 +1,24 @@
+openssl req -newkey rsa:2048 -keyout georchestra-dev.umrthema.univ-fcomte.fr.key -nodes -subj "/C=FR/O=Universite de Franche Comte/CN=georchestra-dev.umrthema.univ-fcomte.fr/"
+Generating a 2048 bit RSA private key
+.............................+++
+.............+++
+writing new private key to 'georchestra-dev.umrthema.univ-fcomte.fr.key'
+-----
+-----BEGIN CERTIFICATE REQUEST-----
+MIICqjCCAZICAQAwZTELMAkGA1UEBhMCRlIxJDAiBgNVBAoMG1VuaXZlcnNpdGUg
+ZGUgRnJhbmNoZSBDb210ZTEwMC4GA1UEAwwnZ2VvcmNoZXN0cmEtZGV2LnVtcnRo
+ZW1hLnVuaXYtZmNvbXRlLmZyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+AQEAu8dOSg8E/vUmXykmPANuJfncYQKuQmtWtxSvczMyzMogWqdldFmd/c3iVycS
+IebHDFGw1+b2J87raY2lqXnsm8KEK2sTJKGagvBP5aeows3olfRYFwuTc62PRqd0
+dlFKaKyvNSMfONwLiZEvz+UTDNV9her2tv/WEPYSlNIcjquQNXA1wENQrSgNCzjW
+GPqMtujFeEcKoMEqcdJMO/RwiGfbwvICwT6h1WKry4A6Y/a834BJxcwK2VFGtNJY
+R72m3zjPC/+ge2EkvpiY63vIPGbLpwK/NpGW6zs6/FbccK4sudhEBlpHRmGmFUIX
+OzRLfKyag05+7BTyI1t4trurjQIDAQABoAAwDQYJKoZIhvcNAQELBQADggEBAEvl
+HaeMwAyMdxDHODUI1BwTdvJ4d7oMZiPPZzleyC8cazWk4G/BA2vY2/fcHk0YgA65
+Tt5SDWbiv1YlESXwRlQ3zDVAKwPP2tOkMNG5z2VHFfuuIqFoghIRUazC19K7xJkI
+xxc5up8H6d6/RqaSuB4lVta4dXUjZvCPvbN0BVBjDuhpID+7BFc6vZ6kAjqBJ8gJ
+jWILcyIelHiTYAYkvDLLBP0EsokLcTHykb0iC29VR+2I13BgMnHw8mUuI15Wlb8y
+sv+b7tqkYfa/kWCh9+n1jwrQrTSEdvBPCjs7NxibFrIyOMn0VfSnVgCL51ZeK6kW
+P7RCQPzXAYI70I4tku8=
+-----END CERTIFICATE REQUEST-----
+

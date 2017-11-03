@@ -1,0 +1,12 @@
+dn: uid=georchestra-restreint,ou=users,dc=georchestra,dc=org
+mail: francois.chiarello@free.fr
+uid: georchestra-restreint
+givenName: georchestra-restreint
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: georchestra-restreint
+cn: georchestra georchestra-restreint
+userpassword: {SSHA}wSCVIRaRXKdD/7XNVBZRBJWBfDQINTMk
+

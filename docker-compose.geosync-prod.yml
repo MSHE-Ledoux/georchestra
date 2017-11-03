@@ -1,0 +1,15 @@
+version: '3'
+
+# variables d'environnement avec secrets
+
+services:
+
+  ldap:
+    environment:
+      - AD_PASSWORD=
+
+  geosync:
+    environment:
+      - OPEN_USER_DAVPASS=Lesoleilauzenith
+      - RSCT_USER_DAVPASS=Lesoleilauzenith
+

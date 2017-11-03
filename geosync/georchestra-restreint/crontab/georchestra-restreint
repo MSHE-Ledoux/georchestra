@@ -1,0 +1,4 @@
+# geosync - importe les couches partagées via owncloud dans le geoserver
+# */1 08-20 * * 1-5 /usr/local/geosync/bin/sync_data.sh && /usr/local/geosync/bin/clean_data.sh >> /var/log/georchestra-restreint/cron_error.log
+*/1 * * * * /usr/local/geosync/bin/sync_data.sh && /usr/local/geosync/bin/clean_data.sh >> /var/log/georchestra-restreint/cron_error.log
+
