@@ -1,4 +1,4 @@
-version: '3'
+version: '3.2'
 
 volumes:
   postgresql_data:
@@ -64,9 +64,9 @@ services:
       - geoserver_tiles:/mnt/geoserver_tiles
     environment:
       - TZ=Europe/Paris
-      #- SERVER_URL=https://georchestra-docker.umrthema.univ-fcomte.fr
+      - SERVER_URL=https://georchestra-docker.umrthema.univ-fcomte.fr
       #- SERVER_URL=https://georchestra-test.umrthema.univ-fcomte.fr
-      - SERVER_URL=https://georchestra-dev.umrthema.univ-fcomte.fr
+      #- SERVER_URL=https://georchestra-dev.umrthema.univ-fcomte.fr
       #- SERVER_URL=https://georchestra-mshe.univ-fcomte.fr
       - XMS=256M
       - XMX=8G
@@ -158,10 +158,18 @@ services:
     volumes:
       - /etc/georchestra:/etc/georchestra
       - geonetwork_datadir:/mnt/geonetwork_datadir
-      - /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
+      #- /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
+      - type : volume
+        source : geosync_ouvert
+        target : /mnt/geosync_ouvert
     environment:
       - XMS=256M
       - XMX=6G
+    extra_hosts:
+      - "georchestra-dev.umrthema.univ-fcomte.fr:172.20.74.138"
+      - "georchestra-test.umrthema.univ-fcomte.fr:172.20.74.83"
+      - "georchestra-docker.umrthema.univ-fcomte.fr:172.20.74.124"
+      - "georchestra-mshe.univ-fcomte.fr:193.55.67.144"
     restart: always
 
   analytics:

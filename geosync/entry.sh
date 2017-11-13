@@ -10,13 +10,23 @@ set -e
 # test if already initialized
 if [ ! -d /var/log/georchestra-ouvert ]; then
 
+    echo "home for georchestra-ouvert"
+    cp -r /tmp/georchestra-ouvert /home/.
+    chown -R georchestra-ouvert:geosync /home/georchestra-ouvert
+    chmod 600 /home/georchestra-ouvert/.pgpass
+
     echo "Crontab for georchestra-ouvert"
-    cp /home/georchestra-ouvert/crontab/georchestra-ouvert /var/spool/cron/crontabs/georchestra-ouvert
+    cp /tmp/georchestra-ouvert/crontab/georchestra-ouvert /var/spool/cron/crontabs/georchestra-ouvert
     chmod 0600  /var/spool/cron/crontabs/georchestra-ouvert
     chown georchestra-ouvert:geosync /var/spool/cron/crontabs/georchestra-ouvert
 
+    echo "home for georchestra-restreint"
+    cp -r /tmp/georchestra-restreint /home/.
+    chown -R georchestra-restreint:geosync /home/georchestra-restreint
+    chmod 600 /home/georchestra-restreint/.pgpass
+
     echo "Crontab for georchestra-restreint"
-    cp /home/georchestra-restreint/crontab/georchestra-restreint /var/spool/cron/crontabs/georchestra-restreint
+    cp /tmp/georchestra-restreint/crontab/georchestra-restreint /var/spool/cron/crontabs/georchestra-restreint
     chmod 0600  /var/spool/cron/crontabs/georchestra-restreint
     chown georchestra-restreint:geosync /var/spool/cron/crontabs/georchestra-restreint
 
