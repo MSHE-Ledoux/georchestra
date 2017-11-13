@@ -51,7 +51,7 @@ services:
 
   geosync:
     build: geosync
-    image: mshe/geosync
+    image: geosync/geosync
     depends_on:
       - ldap
       - database

@@ -15,8 +15,8 @@ volumes:
 
 services:
   database:
-    image: mshe/database
-    build: postgresql.mshe
+    image: geosync/database
+    build: postgresql.geosync
     ports:
       - "5432:5432"
     environment:
@@ -28,8 +28,8 @@ services:
     restart: always
 
   ldap:
-    image: mshe/ldap
-    build: ldap.mshe
+    image: geosync/ldap
+    build: ldap.geosync
     environment:
       - SLAPD_DC_STRING=dc=georchestra,dc=org
       - SLAPD_ORGANISATION=georchestra
@@ -50,8 +50,8 @@ services:
     restart: always
 
   geoserver:
-    image: mshe/geoserver
-    build: geoserver/webapp/src/docker.mshe
+    image: geosync/geoserver
+    build: geoserver/webapp/src/docker.geosync
     #image: georchestra/geoserver
     #build: geoserver/webapp/src/docker
     depends_on:
