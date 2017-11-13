@@ -64,9 +64,9 @@ services:
       - geoserver_tiles:/mnt/geoserver_tiles
     environment:
       - TZ=Europe/Paris
-      - SERVER_URL=https://georchestra-docker.umrthema.univ-fcomte.fr
+      #- SERVER_URL=https://georchestra-docker.umrthema.univ-fcomte.fr
       #- SERVER_URL=https://georchestra-test.umrthema.univ-fcomte.fr
-      #- SERVER_URL=https://georchestra-dev.umrthema.univ-fcomte.fr
+      - SERVER_URL=https://georchestra-dev.umrthema.univ-fcomte.fr
       #- SERVER_URL=https://georchestra-mshe.univ-fcomte.fr
       - XMS=256M
       - XMX=8G
