@@ -43,29 +43,21 @@ ADD dot.bashrc /root/.bashrc
 RUN groupadd --gid 991 geosync
 
 # add geosync user : georchestra-ouvert
-ADD georchestra-ouvert /home/georchestra-ouvert
+ADD georchestra-ouvert /tmp/georchestra-ouvert
 RUN useradd -s /bin/bash \
             -p $(echo "print crypt("${GEO_USER_PASS:-password}", "salt")" | perl) \
             --uid 992 --gid 991 georchestra-ouvert
-RUN chown -R georchestra-ouvert:geosync /home/georchestra-ouvert
-RUN chmod 600 /home/georchestra-ouvert/.pgpass
 RUN adduser georchestra-ouvert crontab
 
 # add geosync user georchestra-restreint
-ADD georchestra-restreint /home/georchestra-restreint
+ADD georchestra-restreint /tmp/georchestra-restreint
 RUN useradd -s /bin/bash \
             -p $(echo "print crypt("${GEO_USER_PASS:-password}", "salt")" | perl) \
             --uid 993 --gid 991 georchestra-restreint
-RUN chown -R georchestra-restreint:geosync /home/georchestra-restreint
-RUN chmod 600 /home/georchestra-restreint/.pgpass
 RUN adduser georchestra-restreint crontab
 
 # add geosync source code
 COPY geosync /usr/local/geosync
-
-# correction de bug debian/owncloudcmd
-#RUN mkdir /etc/owncloud-client
-#ADD sync-exclude.lst /etc/owncloud-client/sync-exclude.lst
 
 # entrypoint
 COPY entry.sh /

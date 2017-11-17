@@ -1,4 +1,4 @@
-version: '3'
+version: '3.2'
 
 volumes:
   postgresql_data:
@@ -15,8 +15,8 @@ volumes:
 
 services:
   database:
-    image: mshe/database
-    build: postgresql.mshe
+    image: geosync/database
+    build: postgresql.geosync
     ports:
       - "5432:5432"
     environment:
@@ -28,8 +28,8 @@ services:
     restart: always
 
   ldap:
-    image: mshe/ldap
-    build: ldap.mshe
+    image: geosync/ldap
+    build: ldap.geosync
     environment:
       - SLAPD_DC_STRING=dc=georchestra,dc=org
       - SLAPD_ORGANISATION=georchestra
@@ -50,8 +50,8 @@ services:
     restart: always
 
   geoserver:
-    image: mshe/geoserver
-    build: geoserver/webapp/src/docker.mshe
+    image: geosync/geoserver
+    build: geoserver/webapp/src/docker.geosync
     #image: georchestra/geoserver
     #build: geoserver/webapp/src/docker
     depends_on:
@@ -158,10 +158,18 @@ services:
     volumes:
       - /etc/georchestra:/etc/georchestra
       - geonetwork_datadir:/mnt/geonetwork_datadir
-      - /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
+      #- /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
+      - type : volume
+        source : geosync_ouvert
+        target : /mnt/geosync_ouvert
     environment:
       - XMS=256M
       - XMX=6G
+    extra_hosts:
+      - "georchestra-dev.umrthema.univ-fcomte.fr:172.20.74.138"
+      - "georchestra-test.umrthema.univ-fcomte.fr:172.20.74.83"
+      - "georchestra-docker.umrthema.univ-fcomte.fr:172.20.74.124"
+      - "georchestra-mshe.univ-fcomte.fr:193.55.67.144"
     restart: always
 
   analytics:

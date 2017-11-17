@@ -1,4 +1,4 @@
-version: '3'
+version: '3.2'
 
 # Complementary services, not part of geOrchestra core.
 # They are made to ease your life as a developer.
@@ -51,7 +51,7 @@ services:
 
   geosync:
     build: geosync
-    image: mshe/geosync
+    image: geosync/geosync
     depends_on:
       - ldap
       - database
@@ -65,10 +65,10 @@ services:
       - SERVER_URL=https://georchestra-mshe.univ-fcomte.fr
       - OCL_URL=https://owncloud-mshe.univ-fcomte.fr
     volumes:
-      - geosync_ouvert:/home/georchestra-ouvert
-      #- /docker/georchestra/geosync_ouvert:/home/georchestra-ouvert
-      - geosync_restreint:/home/georchestra-restreint
-      #- /docker/georchestra/geosync_restreint:/home/georchestra-restreint
+      #- geosync_ouvert:/home/georchestra-ouvert
+      - /docker/georchestra/geosync_ouvert:/home/georchestra-ouvert
+      #- geosync_restreint:/home/georchestra-restreint
+      - /docker/georchestra/geosync_restreint:/home/georchestra-restreint
     extra_hosts:
       - "georchestra-dev.umrthema.univ-fcomte.fr:172.20.74.138"
       - "georchestra-test.umrthema.univ-fcomte.fr:172.20.74.83"
