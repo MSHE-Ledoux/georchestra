@@ -46,7 +46,8 @@ services:
       - "2222:22"
     volumes:
       #- geoserver_geodata:/mnt/geoserver_geodata
-      - /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
+      #- /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
+      - /docker/georchestra/geosync_ouvert:/mnt/geoserver_geodata
     restart: always
 
   geosync:
