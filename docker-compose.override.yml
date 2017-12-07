@@ -46,8 +46,7 @@ services:
       - "2222:22"
     volumes:
       #- geoserver_geodata:/mnt/geoserver_geodata
-      #- /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
-      - /docker/georchestra/geosync_ouvert:/mnt/geoserver_geodata
+      - /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
     restart: always
 
   geosync:
@@ -66,8 +65,8 @@ services:
       #- SERVER_URL=https://georchestra-mshe.univ-fcomte.fr
       - OCL_URL=https://owncloud-mshe.univ-fcomte.fr
     volumes:
-      #- geosync_ouvert:/home/georchestra-ouvert
-      - /docker/georchestra/geosync_ouvert:/home/georchestra-ouvert
+      - geosync_ouvert:/home/georchestra-ouvert
+      #- /docker/georchestra/geosync_ouvert:/home/georchestra-ouvert
       #- geosync_restreint:/home/georchestra-restreint
       - /docker/georchestra/geosync_restreint:/home/georchestra-restreint
     extra_hosts:

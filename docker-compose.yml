@@ -60,8 +60,10 @@ services:
       #- geoserver_datadir:/mnt/geoserver_datadir
       - /docker/georchestra/geoserver_datadir:/mnt/geoserver_datadir
       #- geoserver_geodata:/mnt/geoserver_geodata
-      - /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
       - geoserver_tiles:/mnt/geoserver_tiles
+      - type: volume
+        source: geosync_ouvert
+        target: /mnt/geoserver_geosync_ouvert
     environment:
       - TZ=Europe/Paris
       - SERVER_URL=https://georchestra-docker.umrthema.univ-fcomte.fr
