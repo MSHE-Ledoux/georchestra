@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2016 by the geOrchestra PSC
+ * Copyright (C) 2009-2017 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -299,29 +299,17 @@ public class Proxy {
         if (request.getRequestURI().startsWith("/sec/proxy/")) {
             testLegalContentType(request);
             URL url;
-            InetAddress remoteAddress;
             try {
                 url = new URL(sURL);
-                remoteAddress = InetAddress.getByName(url.getHost());
             } catch (MalformedURLException e) { // not an url
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 return;
-            } catch (UnknownHostException e){
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                return;
             }
-
-            /*
-             * Disallow :
-             * - Class C IP address (isSiteLocalAddress())
-             * - not allowed urls defined in permissions.xml
-             * - URL defined is target-mappings.xml (urlIsProtected())
-             */
-            if (remoteAddress.isSiteLocalAddress() || proxyPermissions.isDenied(url) || urlIsProtected(request, url)) {
+            if (proxyPermissions.isDenied(url) || urlIsProtected(request, url)) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "URL is not allowed.");
                 return;
             }
-            handleRequest(request, response, type, sURL);
+            handleRequest(request, response, type, sURL, false);
         } else {
             handlePathEncodedRequests(request, response, type);
         }
@@ -548,7 +536,7 @@ public class Proxy {
                 }
             }
 
-            handleRequest(request, response, requestType, sURL);
+            handleRequest(request, response, requestType, sURL, true);
         } catch (IOException e) {
             logger.error("Error connecting to client", e);
         }
@@ -623,7 +611,7 @@ public class Proxy {
         }
     }
 
-    private void handleRequest(HttpServletRequest request, HttpServletResponse finalResponse, RequestType requestType, String sURL) {
+    private void handleRequest(HttpServletRequest request, HttpServletResponse finalResponse, RequestType requestType, String sURL, boolean localProxy) {
         HttpClientBuilder htb = HttpClients.custom().disableRedirectHandling();
 
         RequestConfig config = RequestConfig.custom().setSocketTimeout(this.httpClientTimeout).build();
@@ -690,6 +678,20 @@ public class Proxy {
                 logger.error("Unable to log the request into the statistics logger", e);
             }
 
+            if (localProxy) {
+                //
+                // Hack for geoserver
+                // Should not be here. We must use a ProxyTarget class and
+                // define
+                // if Host header should be forwarded or not.
+                //
+                request.getHeader("Host");
+                proxyingRequest.setHeader("Host", request.getHeader("Host"));
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Host header set to: " + proxyingRequest.getFirstHeader("Host").getValue() + " for proxy request.");
+                }
+            }
             proxiedResponse = executeHttpRequest(httpclient, proxyingRequest);
             StatusLine statusLine = proxiedResponse.getStatusLine();
             statusCode = statusLine.getStatusCode();

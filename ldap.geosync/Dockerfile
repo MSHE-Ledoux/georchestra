@@ -13,7 +13,7 @@ RUN echo $TZ > /etc/timezone && \
     apt-get clean
 
 # add packages
-RUN apt-get install -y ldap-utils python python-ldap cron sasl2-bin
+RUN apt-get install -y ldap-utils python python-ldap cron sasl2-bin procps
 RUN rm -rf /var/lib/apt/lists/*
 
 # add ldif files for georchestra

@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     libsaxonb-java \
     dbview \
     owncloud-client-cmd \
-    colordiff less vim openssh-client \
+    less vim colordiff openssh-client \
  && rm -rf /var/lib/apt/lists/*
 
 # bash_profile and bashrc 

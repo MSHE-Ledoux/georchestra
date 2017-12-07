@@ -49,7 +49,7 @@ Groups in geOrchestra are instances of groupOfMembers objects, which allows empt
 This objectClass comes from rfc2307bis and is not available by default in OpenLDAP. As a result, we need to import its structure into the ```cn=config``` database, using the [groupofmembers.ldif](../../ldap/groupofmembers.ldif) file:
 
 ```
-ldapadd -Y EXTERNAL -H ldapi:/// -f groupofmembers.ldif
+sudo ldapadd -Y EXTERNAL -H ldapi:/// -f groupofmembers.ldif
 ```
 
 ## The "memberof" overlay
@@ -57,6 +57,10 @@ ldapadd -Y EXTERNAL -H ldapi:/// -f groupofmembers.ldif
 The optional "memberof" overlay is great to check if a user is a member of a given group.
 Use the [memberof.ldif](../../ldap/memberof.ldif) file to add the module and configure the overlay.
 
+Before inserting it, watch for the database name it targets... currently `olcDatabase={1}mdb,cn=config`.
+If the database you created with the `bootstrap.ldif` file is named differently, please adjust the `memberof.ldif` file content accordingly.
+
+Then:
 ```
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f memberof.ldif 
 ```
@@ -90,4 +94,4 @@ ldapvi --host localhost -D "cn=admin,dc=georchestra,dc=org" -w "secret" -b "dc=g
 ```
 
  * [Apache Directory Studio](http://directory.apache.org/studio/), a powerful desktop client.
- * our own [ldapadmin](/ldapadmin/README.md) web application, available at ```/ldapadmin/privateui/``` to  members of the ```MOD_LDAPADMIN``` group, is probably the easiest one.
+ * our own [console](/ldapadmin/README.md) web application, available at ```/ldapadmin/console/``` to  members of the ```MOD_LDAPADMIN``` group, is probably the easiest one.

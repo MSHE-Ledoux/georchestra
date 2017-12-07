@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2016 by the geOrchestra PSC
+ * Copyright (C) 2009-2017 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -153,6 +153,9 @@ Ext.namespace("GEOR");
             ok: tr("OK"),
             cancel: tr("Cancel")
         });
+
+        Ext.isIE11 = navigator.userAgent.toLowerCase().lastIndexOf('rv:11') > -1;
+        Ext.isIE = Ext.isIE || Ext.isIE11;
 
         /*
          * Setting of proj4js global vars.
