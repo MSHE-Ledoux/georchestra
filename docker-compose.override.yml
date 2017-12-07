@@ -65,13 +65,13 @@ services:
       #- SERVER_URL=https://georchestra-mshe.univ-fcomte.fr
       - OCL_URL=https://owncloud-mshe.univ-fcomte.fr
     volumes:
-      - georchestra_ouvert:/home/georchestra-ouvert
+      - /docker/georchestra/geosync_ouvert:/home/georchestra-ouvert
       - type: volume
         source: geosync_ouvert
         target: /mnt/geosync_ouvert/owncloudsync
         volume:
           nocopy: true
-      - georchestra_restreint:/home/georchestra-restreint
+      - /docker/georchestra/geosync_restreint:/home/georchestra-restreint
       - type: volume
         source: geosync_restreint
         target: /mnt/geosync_restreint/owncloudsync
