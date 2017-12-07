@@ -55,11 +55,11 @@ else
 fi
 
 # test if georchestra-ouvert owncloudsync already exist
-if [ ! -d /home/georchestra-ouvert/owncloudsync ]; then
+if [ ! -d /mnt/geosync_ouvert/owncloudsync ]; then
 
     echo "creating georchestra-ouvert owncloudsync"
-    mkdir /home/georchestra-ouvert/owncloudsync
-    chown georchestra-ouvert:geosync /home/georchestra-ouvert/owncloudsync
+    mkdir -P /mnt/geosync_ouvert/owncloudsync
+    chown georchestra-ouvert:geosync /mnt/geosync_ouvert/owncloudsync
 
 else
     echo "georchestra-ouvert owncloudsync already exists !"
