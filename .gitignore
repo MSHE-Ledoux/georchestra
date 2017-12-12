@@ -12,4 +12,4 @@ PostTreatment.groovy
 **/.settings
 .idea/
 *.iml
-docker-compose.geosync-prod.yml
+./docker-compose.geosync-prod.yml
