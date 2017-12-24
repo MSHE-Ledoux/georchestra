@@ -12,16 +12,16 @@ volumes:
   geonetwork_datadir:
   georchestra_ouvert:
   georchestra_restreint:
-  geosync_ouvert:
+  geosync_dev_ouvert:
     driver_opts:
       type: "nfs"
       o: "addr=172.20.74.148,nolock,soft,rw"
-      device: ":/nfs/docker/georchestra/geosync_ouvert/owncloudsync"
-  geosync_restreint:
+      device: ":/nfs/docker/georchestra/geosync_dev_ouvert/owncloudsync"
+  geosync_dev_restreint:
     driver_opts:
       type: "nfs"
       o: "addr=172.20.74.148,nolock,soft,rw"
-      device: ":/nfs/docker/georchestra/geosync_restreint/owncloudsync"
+      device: ":/nfs/docker/georchestra/geosync_dev_restreint/owncloudsync"
 
 services:
   database:
@@ -73,10 +73,10 @@ services:
       - /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
       - geoserver_tiles:/mnt/geoserver_tiles
       - type : volume
-        source : geosync_ouvert
+        source : geosync_dev_ouvert
         target : /mnt/geosync_ouvert
       - type : volume
-        source : geosync_restreint
+        source : geosync_dev_restreint
         target : /mnt/geosync_restreint
     environment:
       - TZ=Europe/Paris
@@ -174,9 +174,6 @@ services:
     volumes:
       - /etc/georchestra:/etc/georchestra
       - geonetwork_datadir:/mnt/geonetwork_datadir
-      - type : volume
-        source : geosync_ouvert
-        target : /mnt/geosync_ouvert
     environment:
       - XMS=256M
       - XMX=6G
