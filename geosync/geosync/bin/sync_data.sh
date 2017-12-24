@@ -8,7 +8,6 @@ SCRIPT_PATH=`dirname "$SCRIPT_FULL_PATH"`  # /absolute/path
 
 # on a besoin ici uniquement des logs
 PARAMFILE="$HOME/.geosync.conf"
-#local host login passwd workspace datastore pg_datastore db logs publishing_directory
 source "$PARAMFILE"
 
 DATA_PATH="$HOME/data"  # contient le fichier lastdate.txt avec la dernière date de changement de fichier traité
