@@ -1,16 +1,16 @@
 Construire l'image
 
-    docker build -t "mshe/database" .
+    docker build -t "geosync/database" .
 
 Lancer le conteneur, en lui donnant un nom
 
-    docker run -d --name mshe_database_1 mshe/database
+    docker run -d --name geosync_database_1 geosync/database
 
 Se connecter sur le conteneur
 
-    docker exec -it mshe_database_1 bash
+    docker exec -it geosync_database_1 bash
 
 Arrêter le conteneur
 
-    docker rm -f mshe_database_1
+    docker rm -f geosync_database_1
 

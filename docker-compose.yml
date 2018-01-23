@@ -34,7 +34,7 @@ services:
       - POSTGRES_PASSWORD=georchestra
     volumes:
       #- postgresql_data:/var/lib/postgresql/data
-      - /docker/georchestra/postgresql_data:/var/lib/postgresql/data
+      - /docker/georchestra/postgresql_data/9.4:/var/lib/postgresql/data
     restart: always
 
   ldap:

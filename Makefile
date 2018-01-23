@@ -1,17 +1,17 @@
 # Docker related targets
 
 docker-pull-jetty-jre7:
-	docker pull jetty:9.2-jre7
+	docker pull jetty:9-jre7
 
 docker-pull-jetty-jre8:
-	docker pull jetty:9.3-jre8
+	docker pull jetty:9-jre8
 
 docker-build-ldap:
 	docker pull dinkel/openldap
 	docker-compose build ldap
 
 docker-build-database:
-	docker pull postgres:9.4
+	docker pull postgres:10
 	docker-compose build database
 
 docker-build-gn3: docker-pull-jetty-jre8
@@ -38,10 +38,10 @@ docker-build-ldapadmin: docker-pull-jetty-jre8
 	./mvn clean package docker:build -Pdocker -DskipTests --pl ldapadmin
 
 docker-build-georchestra: docker-pull-jetty-jre8 docker-build-database docker-build-ldap docker-build-geoserver docker-build-gn3
-	./mvn clean package docker:build -Pdocker -DskipTests --pl extractorapp,cas-server-webapp,security-proxy,mapfishapp,header,ldapadmin,analytics,catalogapp,downloadform,geowebcache-webapp,atlas
+	./mvn clean package docker:build -Pdocker -DskipTests --pl extractorapp,cas-server-webapp,security-proxy,mapfishapp,header,ldapadmin,analytics,downloadform,geowebcache-webapp,atlas
 
 docker-build-dev:
-	docker pull debian:jessie
+	docker pull debian:stretch
 	docker pull tianon/apache2
 	docker-compose build smtp courier-imap webmail geodata
 
@@ -93,7 +93,7 @@ deb-build-geoserver-geofence: war-build-geoserver-geofence
 	../mvn clean package deb:package -PdebianPackage --pl webapp
 
 deb-build-georchestra: war-build-georchestra build-deps deb-build-geoserver
-	./mvn package deb:package -pl atlas,catalogapp,cas-server-webapp,downloadform,security-proxy,header,mapfishapp,extractorapp,analytics,geoserver/webapp,ldapadmin,geonetwork/web,geowebcache-webapp -PdebianPackage -DskipTests
+	./mvn package deb:package -pl atlas,cas-server-webapp,downloadform,security-proxy,header,mapfishapp,extractorapp,analytics,geoserver/webapp,ldapadmin,geonetwork/web,geowebcache-webapp -PdebianPackage -DskipTests
 
 # Base geOrchestra config and common modules
 build-deps:

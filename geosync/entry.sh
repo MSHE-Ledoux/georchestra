@@ -56,7 +56,7 @@ fi
 if [ ! -d /mnt/geosync_ouvert/owncloudsync ]; then
 
     echo "creating georchestra-ouvert owncloudsync"
-    mkdir -P /mnt/geosync_ouvert/owncloudsync
+    mkdir -p /mnt/geosync_ouvert/owncloudsync
     chown georchestra-ouvert:geosync /mnt/geosync_ouvert/owncloudsync
 
 else
