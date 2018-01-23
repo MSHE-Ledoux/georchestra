@@ -86,7 +86,7 @@ main() {
   source "$paramfilepath"
 
   # attention le fichier .geosync est interprété et fait donc confiance au code
-  # pour une solution plus sûre envisager quelque chose comme : #while read -r line; do declare $line; done < "$HOME/.pass"
+  # pour une solution plus sûr envisager quelque chose comme : #while read -r line; do declare $line; done < "$HOME/.pass"
 
   # vérification du host/login/mot de passe
   if [ ! "$login" ] || [ ! "$passwd" ] || [ ! "$host" ]; then

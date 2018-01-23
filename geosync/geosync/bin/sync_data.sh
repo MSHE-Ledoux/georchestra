@@ -8,6 +8,7 @@ SCRIPT_PATH=`dirname "$SCRIPT_FULL_PATH"`  # /absolute/path
 
 # on a besoin ici uniquement des logs
 PARAMFILE="$HOME/.geosync.conf"
+#local host login passwd workspace datastore pg_datastore db logs publishing_directory
 source "$PARAMFILE"
 
 DATA_PATH="$HOME/data"  # contient le fichier lastdate.txt avec la dernière date de changement de fichier traité
@@ -26,7 +27,9 @@ fi
   date >> $LOG_PATH/sync.log
   date >> $LOG_PATH/sync_error.log
   
-  bash "${SCRIPT_PATH}/sync_owncloud_data.sh" 1>>$LOG_PATH/sync.log 2>>$LOG_PATH/sync_error.log
+  cmd="bash '${SCRIPT_PATH}/sync_owncloud_data.sh' 1>>$LOG_PATH/sync.log 2>>$LOG_PATH/sync_error.log"
+  echo $cmd
+  eval $cmd
 
   date >> $LOG_PATH/publish.log
   date >> $LOG_PATH/publish_error.log
