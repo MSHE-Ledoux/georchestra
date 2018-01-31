@@ -1,8 +1,11 @@
-publishing_directory=/mnt/georchestra-restreint/owncloudsync
+share_directory=/mnt/georchestra-restreint/owncloudsync
 host=SERVER_URL
 dbhost=database
 dbuser=geosync
 dbpass=sonmotdepasse
+ocl_host=OCL_URL
+ocl_login=georchestra-restreint
+ocl_passwd=sonmotdepasse
 login=georchestra-restreint
 passwd=sonmotdepasse
 workspace=geosync-restreint

@@ -64,11 +64,11 @@ else
 fi
 
 # test if georchestra-restreint owncloudsync already exist
-if [ ! -d /home/georchestra-restreint/owncloudsync ]; then
+if [ ! -d /mnt/geosync_restreint/owncloudsync ]; then
 
     echo "creating georchestra-restreint owncloudsync"
-    mkdir /home/georchestra-restreint/owncloudsync
-    chown georchestra-restreint:geosync /home/georchestra-restreint/owncloudsync
+    mkdir -p /mnt/geosync_restreint/owncloudsync
+    chown georchestra-restreint:geosync /mnt/geosync_restreint/owncloudsync
 
 else
     echo "georchestra-restreint owncloudsync already exists !"

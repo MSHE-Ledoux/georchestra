@@ -13,3 +13,6 @@ PostTreatment.groovy
 .idea/
 *.iml
 ./docker-compose.geosync-prod.yml
+./geosync/georchestra-ouvert/.geosync.conf
+./geosync/georchestra-restreint/.geosync.conf
+

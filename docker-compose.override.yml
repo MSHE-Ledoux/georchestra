@@ -15,20 +15,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./docker/ssl:/etc/traefik/ssl/
       - /dev/null:/traefik.toml
-    #command: --web --docker --logLevel=INFO --docker.domain='umrthema.univ-fcomte.fr' --docker.exposedbydefault='false' --docker.watch --entryPoints='Name:https Address::443 TLS:/etc/traefik/ssl/georchestra-dev_umrthema_univ-fcomte_fr.pem,/etc/traefik/ssl/georchestra-dev.umrthema.univ-fcomte.fr.key' --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' --defaultentrypoints=http,https
-    #command: --web --docker --logLevel=INFO --docker.domain='umrthema.univ-fcomte.fr' --docker.exposedbydefault='false' --docker.watch --entryPoints='Name:https Address::443 TLS:/etc/traefik/ssl/georchestra-test_umrthema_univ-fcomte_fr.pem,/etc/traefik/ssl/georchestra-test.umrthema.univ-fcomte.fr.key' --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' --defaultentrypoints=http,https
-    #command: --web --docker --logLevel=INFO --docker.domain='umrthema.univ-fcomte.fr' --docker.exposedbydefault='false' --docker.watch --entryPoints='Name:https Address::443 TLS:/etc/traefik/ssl/georchestra-docker_umrthema_univ-fcomte_fr.pem,/etc/traefik/ssl/georchestra-docker.umrthema.univ-fcomte.fr.key' --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' --defaultentrypoints=http,https
-    command: --web --docker --logLevel=INFO --docker.domain='univ-fcomte.fr' --docker.exposedbydefault='false' --docker.watch --entryPoints='Name:https Address::443 TLS:/etc/traefik/ssl/georchestra-mshe_univ-fcomte_fr.pem,/etc/traefik/ssl/georchestra-mshe.univ-fcomte.fr.key' --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' --defaultentrypoints=http,https
+    # commande de production déplacée dans docker-compose.geosync-prod.yml
+    #command: --web --docker --logLevel=INFO --docker.domain='mydomain.org' --docker.exposedbydefault='false' --docker.watch --entryPoints='Name:https Address::443 TLS:/etc/traefik/ssl/georchestra.mydomain.org.crt,/etc/traefik/ssl/georchestra.mydomain.org.key' --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' --defaultentrypoints=http,https
     restart: always
 
   proxy:
     labels:
       - "traefik.enable=true"
       - "traefik.backend=sp"
-      #- "traefik.frontend.rule=Host:georchestra-dev.umrthema.univ-fcomte.fr"
-      #- "traefik.frontend.rule=Host:georchestra-test.umrthema.univ-fcomte.fr"
-      #- "traefik.frontend.rule=Host:georchestra-docker.umrthema.univ-fcomte.fr"
-      - "traefik.frontend.rule=Host:georchestra-mshe.univ-fcomte.fr"
+      # label de production déplacé dans docker-compose.geosync-prod.yml
+      #- "traefik.frontend.rule=Host:georchestra.mydomain.org"
       - "traefik.frontend.passHostHeader=true"
     restart: always
 
@@ -59,28 +55,13 @@ services:
       - geonetwork
     environment:
       - TZ=Europe/Paris
-      #- SERVER_URL=https://georchestra-docker.umrthema.univ-fcomte.fr
-      #- SERVER_URL=https://georchestra-test.umrthema.univ-fcomte.fr
-      #- SERVER_URL=https://georchestra-dev.umrthema.univ-fcomte.fr
-      - SERVER_URL=https://georchestra-mshe.univ-fcomte.fr
-      - OCL_URL=https://owncloud-mshe.univ-fcomte.fr
+      # variables de production déplacées dans docker-compose.geosync-prod.yml
+      #- SERVER_URL=https://georchestra.mydomain.org
+      #- OCL_URL=https://owncloud.mydomain.org
     volumes:
-      - /docker/georchestra/geosync_ouvert:/home/georchestra-ouvert
-      - type: volume
-        source: geosync_ouvert
-        target: /mnt/geosync_ouvert/owncloudsync
-        volume:
-          nocopy: true
-      - /docker/georchestra/geosync_restreint:/home/georchestra-restreint
-      - type: volume
-        source: geosync_restreint
-        target: /mnt/geosync_restreint/owncloudsync
-        volume:
-          nocopy: true
-    extra_hosts:
-      - "georchestra-dev.umrthema.univ-fcomte.fr:172.20.74.138"
-      - "georchestra-test.umrthema.univ-fcomte.fr:172.20.74.83"
-      - "georchestra-docker.umrthema.univ-fcomte.fr:172.20.74.124"
-      - "georchestra-mshe.univ-fcomte.fr:193.55.67.144"
+      - /docker/georchestra/georchestra_ouvert:/home/georchestra-ouvert
+      #- /docker/georchestra/geosync_test_ouvert:/mnt/geosync_ouvert/owncloudsync
+      - /docker/georchestra/georchestra_restreint:/home/georchestra-restreint
+      #- /docker/georchestra/geosync_test_restreint:/mnt/geosync_restreint/owncloudsync
     restart: always
 
