@@ -60,8 +60,8 @@ services:
       #- OCL_URL=https://owncloud.mydomain.org
     volumes:
       - /docker/georchestra/georchestra_ouvert:/home/georchestra-ouvert
-      #- /docker/georchestra/geosync_test_ouvert:/mnt/geosync_ouvert/owncloudsync
+      - /docker/georchestra/geosync_dev_ouvert:/mnt/geosync_ouvert/owncloudsync
       - /docker/georchestra/georchestra_restreint:/home/georchestra-restreint
-      #- /docker/georchestra/geosync_test_restreint:/mnt/geosync_restreint/owncloudsync
+      - /docker/georchestra/geosync_dev_restreint:/mnt/geosync_restreint/owncloudsync
     restart: always
 
