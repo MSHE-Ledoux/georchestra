@@ -1,4 +1,4 @@
-version: '3.2'
+version: "3"
 
 volumes:
   postgresql_data:
@@ -61,6 +61,7 @@ services:
       #- geoserver_geodata:/mnt/geoserver_geodata
       - /docker/georchestra/geoserver_geodata:/mnt/geoserver_geodata
       - geoserver_tiles:/mnt/geoserver_tiles
+      - /etc/georchestra:/etc/georchestra
     environment:
       # variable de production déplacée dans docker-compose.geosync-prod.yml
       #- SERVER_URL=https://georchestra.mydomain.org
@@ -160,5 +161,4 @@ services:
       - XMS=256M
       - XMX=1G
     restart: always
-
 

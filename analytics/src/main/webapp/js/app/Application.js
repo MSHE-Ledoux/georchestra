@@ -34,29 +34,19 @@ Ext.require([
     // 'Analytics.store.*' surprisingly does not work, so:
     'Analytics.store.OGCLayers',
     'Analytics.store.OGCGroups',
-    'Analytics.store.OGCUsers',
-    'Analytics.store.GeonetworkFiles',
-    'Analytics.store.GeonetworkUsers',
-    'Analytics.store.GeonetworkGroups',
-    'Analytics.store.ExtractorLayers',
-    'Analytics.store.ExtractorGroups',
-    'Analytics.store.ExtractorUsers'
+    'Analytics.store.OGCUsers'
 ]);
 
 Ext.application({
     name: 'Analytics',
     appFolder:'resources/js/app', // strange that it needs to be here // kind of redundant with the above Ext.Loader paths
     autoCreateViewport: true, // By setting autoCreateViewport to true, the framework will, by convention, include the app/view/Viewport.js file
-    models: ['OGCLayer','OGCUser','OGCGroup','GeonetworkFile','GeonetworkUser','GeonetworkGroup','ExtractorLayer','ExtractorUser','ExtractorGroup'],
+    models: ['OGCLayer','OGCUser','OGCGroup'],
     stores: [
         'OGCLayers','OGCUsers','OGCGroups',
-        'GeonetworkFiles','GeonetworkUsers','GeonetworkGroups',
-        'ExtractorLayers','ExtractorUsers', 'ExtractorGroups',
-        'FilteredOGCLayers','FilteredOGCUsers',
-        'FilteredGeonetworkFiles','FilteredGeonetworkUsers',
-        'FilteredExtractorLayers','FilteredExtractorUsers'
+        'FilteredOGCLayers','FilteredOGCUsers'
     ],
-    controllers: ['Geonetwork', 'Extractor', 'OGC', 'Month'],
+    controllers: ['OGC', 'Month'],
     launch: function() {
         // TODO
     }

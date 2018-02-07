@@ -14,6 +14,7 @@
     <geowebcache.war.excludes/>
     <maven.test.skip>false</maven.test.skip>
     <geowebcache.version>1.8.1</geowebcache.version>
+    <packageDatadirScmVersion>master</packageDatadirScmVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -209,6 +210,8 @@
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
               <pushChanges>false</pushChanges>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
             </configuration>
             <executions>
               <execution>
@@ -291,6 +294,8 @@
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
               <pushChanges>false</pushChanges>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
             </configuration>
             <executions>
               <execution>
@@ -374,7 +379,7 @@
       <properties>
         <dockerImageName>georchestra/geowebcache</dockerImageName>
         <dockerDatadirScmUrl>scm:git:https://github.com/georchestra/datadir.git</dockerDatadirScmUrl>
-        <dockerDatadirScmVersion>docker-master</dockerDatadirScmVersion>
+        <dockerDatadirScmVersion>docker-${packageDatadirScmVersion}</dockerDatadirScmVersion>
       </properties>
       <build>
         <finalName>geowebcache</finalName>

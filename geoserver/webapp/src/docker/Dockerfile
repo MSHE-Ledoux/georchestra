@@ -1,4 +1,4 @@
-FROM jetty:9-jre7
+FROM jetty:9-jre8
 
 ENV XMS=1536M XMX=8G
 
@@ -29,13 +29,12 @@ USER jetty
 VOLUME [ "/mnt/geoserver_datadir", "/mnt/geoserver_geodata", "/mnt/geoserver_tiles", "/tmp", "/run/jetty" ]
 
 CMD ["sh", "-c", "exec java -Djava.io.tmpdir=/tmp/jetty \
--Dgeorchestra.datadir=/etc/georchestra \
--Dgeofence.dir=/etc/georchestra/geoserver/geofence \
+-Dgeofence-ovr=file:/etc/georchestra/geoserver/geofence/geofence-datasource-ovr.properties \
 -DGEOSERVER_DATA_DIR=/mnt/geoserver_datadir \
 -DGEOWEBCACHE_CACHE_DIR=/mnt/geoserver_tiles \
 -DENABLE_JSONP=true \
+-Dorg.geotools.coverage.jaiext.enabled=true \
 -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 \
--Dorg.geotools.image.reduceWarpAffine=false \
 -Xms$XMS -Xmx$XMX \
 -XX:SoftRefLRUPolicyMSPerMB=36000 \
 -XX:+UseParallelGC \

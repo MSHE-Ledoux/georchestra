@@ -84,7 +84,7 @@ GEOR.managelayers = (function() {
          * Fired before all layers are removed from map
          */
         "beforecontextcleared",
-        
+
         /**
          * @event beforecontextcleared
          * Fired after all layers are removed from map
@@ -98,16 +98,8 @@ GEOR.managelayers = (function() {
          * Listener arguments:
          * options - {Object} A hash containing response, model and format
          */
-        "searchresults",
+        "searchresults"
 
-        /**
-         * @event search
-         * Fires when the user presses the search button
-         *
-         * Listener arguments:
-         * panelCfg - {Object} Config object for a panel
-         */
-        "search"
     );
 
     /**
@@ -156,6 +148,7 @@ GEOR.managelayers = (function() {
         url = url instanceof Array ? url[0] : url;
         return layerRecord.get("type") === "WMS" &&
             layerRecord.hasEquivalentWFS() &&
+            !layerRecord.get("layergroup") &&
             GEOR.config.EDITABLE_LAYERS.test(url);
     };
 
@@ -641,7 +634,7 @@ GEOR.managelayers = (function() {
             hasEquivalentWCS = (type === "WMS") ?
                 layerRecord.hasEquivalentWCS() : false,
             isVector = layer instanceof OpenLayers.Layer.Vector,
-            isBaseLayer = layerRecord.get("opaque") || 
+            isBaseLayer = layerRecord.get("opaque") ||
                 layer.transitionEffect === "resize",
             isSingleTile = layer.singleTile;
 
@@ -789,9 +782,6 @@ GEOR.managelayers = (function() {
                             record: layerRecord,
                             map: layer.map,
                             listeners: {
-                                "search": function(panelCfg) {
-                                    observable.fireEvent("search", panelCfg);
-                                },
                                 "searchresults": function(options) {
                                     observable.fireEvent("searchresults", options);
                                 }
@@ -849,7 +839,7 @@ GEOR.managelayers = (function() {
                 }
             });
         }
-        
+
         if (isWMS) {
             menuItems.push({
                 text: tr('Tiled mode'),

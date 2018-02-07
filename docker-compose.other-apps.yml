@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 volumes:
   geowebcache_tiles:
@@ -15,24 +15,6 @@ services:
     environment:
       - XMS=1G
       - XMX=2G
-
-  # simple catalog application (csw frontend)
-  catalogapp:
-    image: georchestra/catalogapp:latest
-    volumes:
-      - /etc/georchestra:/etc/georchestra
-    environment:
-      - XMS=256M
-      - XMX=512M
-
-  # downloadform services (disabled by default)
-  downloadform:
-    image: georchestra/downloadform:latest
-    volumes:
-      - /etc/georchestra:/etc/georchestra
-    environment:
-      - XMS=256M
-      - XMX=512M
 
   # atlas printing services, eventually queried by the mapfishapp atlas addon
   atlas:

@@ -26,15 +26,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.ProxySelector;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.net.URLDecoder;
-import java.net.UnknownHostException;
+import java.io.UnsupportedEncodingException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +48,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -85,7 +79,6 @@ import org.georchestra.ogcservstatistics.log4j.OGCServiceMessageFormatter;
 import org.georchestra.security.permissions.Permissions;
 import org.georchestra.security.permissions.UriMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.oxm.xstream.XStreamMarshaller;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -97,7 +90,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
 import com.google.common.io.Closer;
 
 /**
@@ -147,6 +139,7 @@ public class Proxy {
      * must be defined
      */
     private String defaultTarget;
+    private String publicHostname = "https://georchestra.mydomain.org/";
     private Map<String, String> targets = Collections.emptyMap();
     /**
      * must be defined
@@ -158,7 +151,8 @@ public class Proxy {
 
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-    private Permissions proxyPermissions = new Permissions();
+    private Permissions proxyPermissions = null;
+    private Permissions sameDomainPermissions;
     private String proxyPermissionsFile;
 
 
@@ -173,26 +167,20 @@ public class Proxy {
     }
 
     public void init() throws Exception {
+
+        // Create a deny permission for URL with same domain
+        String publicDomain = new URL(this.publicHostname).getHost();
+        this.sameDomainPermissions = new Permissions();
+        this.sameDomainPermissions.setDenied(Collections.singletonList(new UriMatcher().setDomain(publicDomain)));
+        this.sameDomainPermissions.setAllowByDefault(true);
+        this.sameDomainPermissions.init();
+
         if (targets != null) {
             for (String url : targets.values()) {
                 new URL(url); // test that it is a valid URL
             }
         }
-        if (proxyPermissionsFile != null) {
-            Closer closer = Closer.create();
-            try {
-                final ClassLoader classLoader = Proxy.class.getClassLoader();
-                InputStream inStream = closer.register(classLoader.getResourceAsStream(proxyPermissionsFile));
-                Map<String, Class<?>> aliases = Maps.newHashMap();
-                aliases.put(Permissions.class.getSimpleName().toLowerCase(), Permissions.class);
-                aliases.put(UriMatcher.class.getSimpleName().toLowerCase(), UriMatcher.class);
-                XStreamMarshaller unmarshaller = new XStreamMarshaller();
-                unmarshaller.setAliasesByType(aliases);
-                setProxyPermissions((Permissions) unmarshaller.unmarshal(new StreamSource(inStream)));
-            } finally {
-                closer.close();
-            }
-        }
+
         // georchestra datadir autoconfiguration
         // dependency injection / properties setter() are made by Spring before
         // init() call
@@ -205,7 +193,39 @@ public class Proxy {
             for (String target : pTargets.stringPropertyNames()) {
                 targets.put(target, pTargets.getProperty(target));
             }
+
+            // Configure proxy permissions based on proxy-permissions.xml file in datadir
+            String datadirContext = georchestraConfiguration.getContextDataDir();
+            File datadirPermissionsFile = new File(String.format("%s%s%s", datadirContext,
+                    File.separator, "proxy-permissions.xml"));
+            if(datadirPermissionsFile.exists()){
+                logger.info("reading proxy permissions from " + datadirPermissionsFile.getAbsolutePath());
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(datadirPermissionsFile);
+                    setProxyPermissions(Permissions.Create(fis));
+                    fis.close();
+                } catch(Exception ex){
+                      logger.error("Error during proxy permissions configuration from "
+                              + datadirPermissionsFile.getAbsolutePath());
+                } finally {
+                    fis.close();
+                }
+            }
+
             logger.info("Done.");
+        }
+
+        // Proxy permissions not set by datadir
+        if (proxyPermissionsFile != null && proxyPermissions == null) {
+            Closer closer = Closer.create();
+            try {
+                final ClassLoader classLoader = Proxy.class.getClassLoader();
+                InputStream inStream = closer.register(classLoader.getResourceAsStream(proxyPermissionsFile));
+                setProxyPermissions(Permissions.Create(inStream));
+            } finally {
+                closer.close();
+            }
         }
     }
 
@@ -224,7 +244,7 @@ public class Proxy {
 
     /* ---------- end work around for no gateway option -------------- */
 
-    @RequestMapping(params = "login", method = { GET, POST })
+    @RequestMapping(value= "**", params = "login", method = { GET, POST })
     public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, URISyntaxException {
         String uri = request.getRequestURI();
         if (uri.startsWith("sec")) {
@@ -305,7 +325,12 @@ public class Proxy {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 return;
             }
-            if (proxyPermissions.isDenied(url) || urlIsProtected(request, url)) {
+
+            /*
+             * - deny request with same domain as public_host
+             * - deny based on proxy-permissions.xml file
+             */
+            if(this.sameDomainPermissions.isDenied(url) || proxyPermissions.isDenied(url)){
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "URL is not allowed.");
                 return;
             }
@@ -396,32 +421,32 @@ public class Proxy {
 
     // ----------------- Method calls where request is encoded in path of
     // request ----------------- //
-    @RequestMapping(params = { "!url", "!login" }, method = RequestMethod.GET)
+    @RequestMapping(value="**", params = { "!url", "!login" }, method = RequestMethod.GET)
     public void handleGETRequest(HttpServletRequest request, HttpServletResponse response) {
         handlePathEncodedRequests(request, response, RequestType.GET);
     }
 
-    @RequestMapping(params = { "!url", "!login" }, method = RequestMethod.POST)
+    @RequestMapping(value="**", params = { "!url", "!login" }, method = RequestMethod.POST)
     public void handlePOSTRequest(HttpServletRequest request, HttpServletResponse response) {
         handlePathEncodedRequests(request, response, RequestType.POST);
     }
 
-    @RequestMapping(params = { "!url", "!login" }, method = RequestMethod.DELETE)
+    @RequestMapping(value="**", params = { "!url", "!login" }, method = RequestMethod.DELETE)
     public void handleDELETERequest(HttpServletRequest request, HttpServletResponse response) {
         handlePathEncodedRequests(request, response, RequestType.DELETE);
     }
 
-    @RequestMapping(params = { "!url", "!login" }, method = RequestMethod.HEAD)
+    @RequestMapping(value="**", params = { "!url", "!login" }, method = RequestMethod.HEAD)
     public void handleHEADRequest(HttpServletRequest request, HttpServletResponse response) {
         handlePathEncodedRequests(request, response, RequestType.HEAD);
     }
 
-    @RequestMapping(params = { "!url", "!login" }, method = RequestMethod.OPTIONS)
+    @RequestMapping(value="**", params = { "!url", "!login" }, method = RequestMethod.OPTIONS)
     public void handleOPTIONSRequest(HttpServletRequest request, HttpServletResponse response) {
         handlePathEncodedRequests(request, response, RequestType.OPTIONS);
     }
 
-    @RequestMapping(params = { "!url", "!login" }, method = RequestMethod.PUT)
+    @RequestMapping(value="**", params = { "!url", "!login" }, method = RequestMethod.PUT)
     public void handlePUTRequest(HttpServletRequest request, HttpServletResponse response) {
         handlePathEncodedRequests(request, response, RequestType.PUT);
     }
@@ -449,7 +474,15 @@ public class Proxy {
 
     private String buildForwardRequestURL(HttpServletRequest request) {
         String forwardRequestURI = request.getRequestURI();
-
+        // Makes sure the URL is decoded because some servlet containers
+        // (e.g. tomcat) provides the URL in an encoded manner, whereas
+        // jetty does not.
+        // Also we consider the whole geOrchestra stack to be full utf-8.
+        try {
+            forwardRequestURI = URLDecoder.decode(forwardRequestURI, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Unable to decode the URL, using the encoded version", e);
+        }
         String contextPath = request.getServletPath() + request.getContextPath();
         if (forwardRequestURI.length() <= contextPath.length()) {
             forwardRequestURI = "/";
@@ -501,7 +534,7 @@ public class Proxy {
                 response.sendError(403, forwardRequestURI + " is a recursive call to this service.  That is not a legal request");
             }
 
-            if (request.getQueryString() != null && !isFormContentType(request)) {
+            if (request.getQueryString() != null) {
                 StringBuilder query = new StringBuilder("?");
                 Enumeration paramNames = request.getParameterNames();
                 boolean needCasValidation = false;
@@ -650,7 +683,7 @@ public class Proxy {
             logger.debug("Final request -- " + sURL);
 
             HttpRequestBase proxyingRequest = makeRequest(request, requestType, sURL);
-            headerManagement.configureRequestHeaders(request, proxyingRequest);
+            headerManagement.configureRequestHeaders(request, proxyingRequest, localProxy);
 
             try {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -678,20 +711,6 @@ public class Proxy {
                 logger.error("Unable to log the request into the statistics logger", e);
             }
 
-            if (localProxy) {
-                //
-                // Hack for geoserver
-                // Should not be here. We must use a ProxyTarget class and
-                // define
-                // if Host header should be forwarded or not.
-                //
-                request.getHeader("Host");
-                proxyingRequest.setHeader("Host", request.getHeader("Host"));
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Host header set to: " + proxyingRequest.getFirstHeader("Host").getValue() + " for proxy request.");
-                }
-            }
             proxiedResponse = executeHttpRequest(httpclient, proxyingRequest);
             StatusLine statusLine = proxiedResponse.getStatusLine();
             statusCode = statusLine.getStatusCode();
@@ -713,8 +732,18 @@ public class Proxy {
                 // 403 and 404 are handled by specific JSP files provided by the
                 // security-proxy webapp
                 if ((statusCode == 404) || (statusCode == 403)) {
-                    finalResponse.sendError(statusCode);
-                    return;
+                    // Hack for GN3.4: to protect against CSRF attacks, a token
+                    // is provided by the xml.info service. Even if the return
+                    // code is a 403, we are interested in getting the
+                    // Set-Cookie value.
+                    if (sURL.contains("/geonetwork/")) {
+                        Header setCookie = extractHeaderSetCookie(proxiedResponse);
+                        if (setCookie != null) {
+                            finalResponse.addHeader(setCookie.getName(), setCookie.getValue());
+                        }
+                        finalResponse.sendError(statusCode);
+                        return;
+                    }
                 }
             }
 
@@ -751,6 +780,23 @@ public class Proxy {
         } finally {
             httpclient.getConnectionManager().shutdown();
         }
+    }
+
+    private final static String setCookieHeader = "Set-Cookie";
+
+    /**
+     * Extracts the set-cookie http header from the downstream response.
+     *
+     * @param proxiedResponse
+     * @return the header if present, else null.
+     */
+    private Header extractHeaderSetCookie(HttpResponse proxiedResponse) {
+        for (Header h : proxiedResponse.getAllHeaders()) {
+            if (h.getName().equalsIgnoreCase(setCookieHeader)) {
+                return h;
+            }
+        }
+        return null;
     }
 
     @VisibleForTesting
@@ -890,7 +936,7 @@ public class Proxy {
                 HttpEntity entity;
                 request.setCharacterEncoding("UTF8");
                 if (isFormContentType(request)) {
-                    logger.debug("Post is recognized as a form post.");
+                    logger.debug("Post is a x-www-form-urlencoded POST");
                     List<NameValuePair> parameters = new ArrayList<NameValuePair>();
                     for (Enumeration e = request.getParameterNames(); e.hasMoreElements();) {
                         String name = (String) e.nextElement();
@@ -910,10 +956,8 @@ public class Proxy {
                         charset = defaultCharset;
                     }
                     entity = new UrlEncodedFormEntity(parameters, charset);
-                    post.setEntity(entity);
-
                 } else {
-                    logger.debug("Post is NOT recognized as a form post. (Not an error, just a comment)");
+                    logger.debug("Post is a raw POST request");
                     int contentLength = request.getContentLength();
                     ServletInputStream inputStream = request.getInputStream();
                     entity = new InputStreamEntity(inputStream, contentLength);
@@ -979,14 +1023,20 @@ public class Proxy {
         return targetRequest;
     }
 
+    /**
+     * Returns if the request is a POST x-www-form-urlencoded or not.
+     *
+     * @param request
+     * @return true if this is the case, else false.
+     *
+     */
     private boolean isFormContentType(HttpServletRequest request) {
         if (request.getContentType() == null) {
             return false;
         }
         String contentType = request.getContentType().split(";")[0].trim();
 
-        boolean equalsIgnoreCase = "application/x-www-form-urlencoded".equalsIgnoreCase(contentType);
-        return equalsIgnoreCase;
+        return "application/x-www-form-urlencoded".equalsIgnoreCase(contentType);
     }
 
     /**
@@ -1335,11 +1385,18 @@ public class Proxy {
 
     public void setProxyPermissions(Permissions proxyPermissions) throws UnknownHostException {
         this.proxyPermissions = proxyPermissions;
-        this.proxyPermissions.init();
     }
 
     public Permissions getProxyPermissions() {
         return proxyPermissions;
+    }
+
+    public String getPublicHostname() {
+        return publicHostname;
+    }
+
+    public void setPublicHostname(String publicHostname) {
+        this.publicHostname = publicHostname;
     }
 
 }

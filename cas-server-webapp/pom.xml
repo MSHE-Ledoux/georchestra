@@ -30,6 +30,7 @@
   <properties>
     <spring.version>3.2.6.RELEASE</spring.version>
     <cas.version>4.0.0</cas.version>
+    <packageDatadirScmVersion>master</packageDatadirScmVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -223,6 +224,8 @@
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
               <pushChanges>false</pushChanges>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
             </configuration>
             <executions>
               <execution>
@@ -305,6 +308,8 @@
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
               <pushChanges>false</pushChanges>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
             </configuration>
             <executions>
               <execution>
@@ -388,7 +393,7 @@
       <properties>
         <dockerImageName>georchestra/cas</dockerImageName>
         <dockerDatadirScmUrl>scm:git:https://github.com/georchestra/datadir.git</dockerDatadirScmUrl>
-        <dockerDatadirScmVersion>docker-master</dockerDatadirScmVersion>
+        <dockerDatadirScmVersion>docker-${packageDatadirScmVersion}</dockerDatadirScmVersion>
       </properties>
       <build>
         <finalName>cas</finalName>

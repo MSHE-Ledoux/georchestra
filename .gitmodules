@@ -1,6 +1,3 @@
-[submodule "mapfishapp/src/main/webapp/lib/externals/ext"]
-	path = mapfishapp/src/main/webapp/lib/externals/ext
-	url = https://github.com/probonogeek/extjs.git
 [submodule "mapfishapp/src/main/webapp/lib/externals/geoext"]
 	path = mapfishapp/src/main/webapp/lib/externals/geoext
 	url = https://github.com/georchestra/geoext.git
@@ -13,9 +10,6 @@
 [submodule "extractorapp/src/main/webapp/lib/externals/openlayers"]
 	path = extractorapp/src/main/webapp/lib/externals/openlayers
 	url = https://github.com/georchestra/openlayers.git
-[submodule "extractorapp/src/main/webapp/lib/externals/ext"]
-	path = extractorapp/src/main/webapp/lib/externals/ext
-	url = https://github.com/probonogeek/extjs.git
 [submodule "extractorapp/src/main/webapp/admin/extjs"]
 	path = extractorapp/src/main/webapp/admin/extjs
 	url = https://github.com/probonogeek/extjs.git
@@ -28,18 +22,12 @@
 [submodule "geoserver/georchestra-geoserver/geoserver-checkouts/geoserver-stable"]
 	path = geoserver/georchestra-geoserver/geoserver-checkouts/geoserver-stable
 	url = https://github.com/geoserver/geoserver.git
-[submodule "geoserver/geoserver-submodule"]
-	path = geoserver/geoserver-submodule
-	url = https://github.com/georchestra/geoserver.git
 [submodule "mapfishapp/src/main/webapp/lib/externals/styler"]
 	path = mapfishapp/src/main/webapp/lib/externals/styler
 	url = https://github.com/georchestra/styler.git
 [submodule "config/configurations/template"]
 	path = config/configurations/template
 	url = https://github.com/georchestra/template.git
-[submodule "geoserver/geofence"]
-	path = geoserver/geofence
-	url = https://github.com/georchestra/geofence.git
 [submodule "geotools"]
 	path = geotools
 	url = https://github.com/georchestra/geotools.git
@@ -49,3 +37,13 @@
 [submodule "docker/smtp"]
 	path = docker/smtp
 	url = https://github.com/camptocamp/docker_smtp.git
+[submodule "mapfishapp/src/main/webapp/lib/externals/ext"]
+	path = mapfishapp/src/main/webapp/lib/externals/ext
+	url = https://github.com/georchestra/extjs.git
+[submodule "extractorapp/src/main/webapp/lib/externals/ext"]
+	path = extractorapp/src/main/webapp/lib/externals/ext
+	url = https://github.com/georchestra/extjs.git
+[submodule "geoserver/geoserver-submodule"]
+	path = geoserver/geoserver-submodule
+	url = https://github.com/georchestra/geoserver.git
+

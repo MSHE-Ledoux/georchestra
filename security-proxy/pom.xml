@@ -11,8 +11,8 @@
   <name>security-proxy Webapp</name>
   <url>http://www.georchestra.org</url>
   <properties>
-    <spring.version>3.0.7.RELEASE</spring.version>
-    <security.version>3.1.6.RELEASE</security.version>
+    <spring.version>3.2.18.RELEASE</spring.version>
+    <security.version>3.2.10.RELEASE</security.version>
     <maven.test.skip>false</maven.test.skip>
   </properties>
   <dependencies>
@@ -101,29 +101,14 @@
       <version>${security.version}</version>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>apache-log4j-extras</artifactId>
-      <version>1.1</version>
-      <type>jar</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.4.3</version>
-      <scope>runtime</scope>
-      <optional>true</optional>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+      <version>${security.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ogc-server-statistics</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -161,6 +146,16 @@
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-core</artifactId>
       <version>1.3.2.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>3.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>1.7.25</version>
     </dependency>
   </dependencies>
   <build>
@@ -247,7 +242,6 @@
           <scanIntervalSeconds>5</scanIntervalSeconds>
           <stopKey>JETTY_TOP</stopKey>
           <stopPort>8090</stopPort>
-          <reload>manual</reload>
           <httpConnector>
             <port>8180</port>
           </httpConnector>

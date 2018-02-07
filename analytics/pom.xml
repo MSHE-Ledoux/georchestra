@@ -11,13 +11,14 @@
   <name>Analytics webapp</name>
   <description>
     Analytics is a GUI which displays monthly and global statistics on platform usage:
-    GeoNetwork downloads, custom data extractions and OGC web services consumption.
+    OGC web services consumption.
   </description>
   <url>http://www.georchestra.org</url>
   <properties>
     <spring.version>4.2.3.RELEASE</spring.version>
     <spring_data.version>1.11.1.RELEASE</spring_data.version>
     <postgres.version>9.4-1205-jdbc41</postgres.version>
+    <packageDatadirScmVersion>master</packageDatadirScmVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -119,7 +120,7 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
+      <version>${log4j1.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
@@ -362,6 +363,8 @@
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
               <pushChanges>false</pushChanges>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
             </configuration>
             <executions>
               <execution>
@@ -443,6 +446,8 @@
             <configuration>
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
               <pushChanges>false</pushChanges>
             </configuration>
             <executions>
@@ -527,7 +532,7 @@
       <properties>
         <dockerImageName>georchestra/${project.artifactId}</dockerImageName>
         <dockerDatadirScmUrl>scm:git:https://github.com/georchestra/datadir.git</dockerDatadirScmUrl>
-        <dockerDatadirScmVersion>docker-master</dockerDatadirScmVersion>
+        <dockerDatadirScmVersion>docker-${packageDatadirScmVersion}</dockerDatadirScmVersion>
       </properties>
       <build>
         <finalName>${project.artifactId}</finalName>

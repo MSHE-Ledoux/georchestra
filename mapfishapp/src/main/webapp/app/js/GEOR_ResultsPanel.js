@@ -62,9 +62,6 @@ GEOR.ResultsPanel = Ext.extend(Ext.Panel, {
      */
     sfControl: null,
 
-    //TODO doc
-    id: "resultPanel",
-
     /**
      * Property: noDelete
      * {Boolean} do not show the delete button
@@ -573,7 +570,7 @@ GEOR.ResultsPanel = Ext.extend(Ext.Panel, {
             this.removeAll();
             this.add({
                 bodyStyle: 'padding:1em;',
-                html: tr("<p>No result for that request.</p>")
+                html: tr("<p>No result for this request.</p>")
             });
             return;
         }
@@ -680,12 +677,13 @@ GEOR.ResultsPanel = Ext.extend(Ext.Panel, {
 
     /**
      * APIMethod: clean
-     * This method destroys the features in the vector layer.
+     * This method hides & removes the vector layer from the map
      *
      */
     clean: function() {
         if (this._vectorLayer) {
             this._vectorLayer.setVisibility(false);
+            this.map.removeLayer(this._vectorLayer);
         }
     },
 

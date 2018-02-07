@@ -13,6 +13,7 @@
   <properties>
     <finalName>header</finalName>
     <spring.version>3.1.0.RELEASE</spring.version>
+    <packageDatadirScmVersion>master</packageDatadirScmVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -53,7 +54,7 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
+      <version>${log4j1.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
@@ -158,6 +159,8 @@
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
               <pushChanges>false</pushChanges>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
             </configuration>
             <executions>
               <execution>
@@ -240,6 +243,8 @@
               <checkoutDirectory>${project.build.directory}/deb/etc/georchestra</checkoutDirectory>
               <connectionUrl>scm:git:https://github.com/georchestra/datadir.git</connectionUrl>
               <pushChanges>false</pushChanges>
+              <scmVersion>${packageDatadirScmVersion}</scmVersion>
+              <scmVersionType>branch</scmVersionType>
             </configuration>
             <executions>
               <execution>
@@ -323,7 +328,7 @@
       <properties>
         <dockerImageName>georchestra/${project.artifactId}</dockerImageName>
         <dockerDatadirScmUrl>scm:git:https://github.com/georchestra/datadir.git</dockerDatadirScmUrl>
-        <dockerDatadirScmVersion>docker-master</dockerDatadirScmVersion>
+        <dockerDatadirScmVersion>docker-${packageDatadirScmVersion}</dockerDatadirScmVersion>
       </properties>
       <build>
         <finalName>header</finalName>
