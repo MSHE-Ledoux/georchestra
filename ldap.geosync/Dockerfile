@@ -68,3 +68,11 @@ ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
 CMD ["/root/start.sh"]
 
+# vérification du fonctionnement du conteneur
+HEALTHCHECK --interval=30s --timeout=10s \
+  CMD ldapsearch \
+      -D "cn=admin,dc=georchestra,dc=org" \
+      -w "${SLAPD_PASSWORD}" \
+      -b "dc=georchestra,dc=org" \
+      "cn=geoserver_privileged_user,ou=users,dc=georchestra,dc=org"
+

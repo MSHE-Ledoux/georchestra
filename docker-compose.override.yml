@@ -35,7 +35,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.backend=cas"
-      - "traefik.frontend.rule=Host:georchestra.mydomain.org;PathPrefix:/cas"
+      # label de production déplacé dans docker-compose.geosync-prod.yml
+      #- "traefik.frontend.rule=Host:georchestra.mydomain.org;PathPrefix:/cas"
 
   smtp:
     build: docker/smtp/smtp-sink

@@ -18,3 +18,6 @@ ADD start.sh /docker-entrypoint-initdb.d/
 
 CMD ["postgres"]
 
+HEALTHCHECK --interval=30s --timeout=30s \
+  CMD pg_isready -U postgres
+
