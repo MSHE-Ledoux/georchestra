@@ -4,15 +4,14 @@
   <parent>
     <groupId>org.georchestra</groupId>
     <artifactId>geoserver-root</artifactId>
-    <version>17.06-SNAPSHOT</version>
+    <version>17.12</version>
   </parent>
   <artifactId>geoserver-webapp</artifactId>
   <packaging>war</packaging>
   <name>geOrchestra GeoServer Web Application</name>
   <properties>
     <packageName>georchestra-geoserver</packageName>
-    <gsDatadirScmVersion>gs-2.12.1</gsDatadirScmVersion>
-    <packageDatadirScmVersion>master</packageDatadirScmVersion>
+    <packageDatadirScmVersion>17.12</packageDatadirScmVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -1244,7 +1243,7 @@
       <id>geofence</id>
       <properties>
         <packageName>georchestra-geoserver-geofence</packageName>
-        <dockerGeoserverDatadirScmVersion>geofence-2.12.1</dockerGeoserverDatadirScmVersion>
+        <dockerGeoserverDatadirScmVersion>geofence</dockerGeoserverDatadirScmVersion>
         <dockerImageName>georchestra/geoserver:geofence-${project.parent.version}</dockerImageName>
         <hibernate-spatial-version>1.1.1</hibernate-spatial-version>
         <jdbc-postgis-version>1.3.3</jdbc-postgis-version>
