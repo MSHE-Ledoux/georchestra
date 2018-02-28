@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     python-dev \
     python-owslib \
     python-lxml \
+    python-requests \
+    python-httplib2 \
     libxml2-utils \
     ca-certificates \
     curl \

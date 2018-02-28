@@ -17,3 +17,9 @@ dn: cn=GN_EDITOR,ou=roles,dc=georchestra,dc=org
 changetype: modify
 add: member
 member: uid=georchestra-ouvert,ou=users,dc=georchestra,dc=org
+
+dn: cn=GN_ADMIN,ou=roles,dc=georchestra,dc=org
+changetype: modify
+add: member
+member: uid=georchestra-ouvert,ou=users,dc=georchestra,dc=org
+
