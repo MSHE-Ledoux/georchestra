@@ -18,6 +18,11 @@ if [ ! -d $LOG_PATH ]; then
 	mkdir -p "$LOG_PATH"
 fi
 
+verbose=1 # commenter pour diminuer les logs
+echo_ifverbose() {
+  if [[ $verbose ]]; then echo "$@"; fi
+}
+
 # utilisation d'un verrou pour éviter que les scripts appelés ne se lancent plusieurs fois en même temps
 (
   # Wait for lock on /var/lock/.myscript.exclusivelock (fd 201) for 10 seconds
@@ -28,7 +33,7 @@ fi
   date >> $LOG_PATH/sync_error.log
   
   cmd="bash '${SCRIPT_PATH}/sync_owncloud_data.sh' 1>>$LOG_PATH/sync.log 2>>$LOG_PATH/sync_error.log"
-  echo $cmd
+  echo_ifverbose $cmd
   eval $cmd
 
   date >> $LOG_PATH/publish.log
@@ -45,7 +50,7 @@ fi
   fi
 
   cmd="bash '${SCRIPT_PATH}/publish.sh' -v -i '$INPUT_COPY_PATH' -d '$DATA_PATH' -p '$paramfile' 1>>'$LOG_PATH/publish.log' 2>>'$LOG_PATH/publish_error.log'"
-  echo $cmd
+  echo_ifverbose $cmd
   eval $cmd
 
 
