@@ -35,7 +35,7 @@ echo_ifverbose() {
   date >> $PATH_LOG/sync.log
   date >> $PATH_LOG/sync_error.log
   
-  cmd="bash '${SCRIPT_PATH}/sync_owncloud_data.sh' 1>>$PATH_LOG/sync.log 2>>$LOG_PATH/sync_error.log"
+  cmd="bash '${SCRIPT_PATH}/sync_owncloud_data.sh' 1>>$PATH_LOG/sync.log 2>>$PATH_LOG/sync_error.log"
   echo_ifverbose $cmd
   eval $cmd
 
@@ -52,7 +52,7 @@ echo_ifverbose() {
     echo "WARNING chemin d'arborescence par défaut : ${INPUT_COPY_PATH}"  >> $PATH_LOG/publish_error.log
   fi
 
-  cmd="bash '${SCRIPT_PATH}/publish.sh' -v -i '$INPUT_COPY_PATH' -d '$DATA_PATH' -p '$paramfile' 1>>'$PATH_LOG/publish.log' 2>>'$LOG_PATH/publish_error.log'"
+  cmd="bash '${SCRIPT_PATH}/publish.sh' -v -i '$INPUT_COPY_PATH' -d '$DATA_PATH' -p '$paramfile' 1>>'$PATH_LOG/publish.log' 2>>'$PATH_LOG/publish_error.log'"
   echo_ifverbose $cmd
   eval $cmd
 
