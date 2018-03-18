@@ -12,6 +12,9 @@ PATH_LOG="/var/log/$logs"
 
 # date dans les logs
 date >> $PATH_LOG/clean.log
+
+# pour envoyer la sortie standard dans les logs
+exec >$PATH_LOG/clean.log
   
 # appel de clean.sh
 cmd="bash '${SCRIPT_PATH}/clean.sh' -v -d 1>>$PATH_LOG/clean.log 2>>$PATH_LOG/clean_error.log"

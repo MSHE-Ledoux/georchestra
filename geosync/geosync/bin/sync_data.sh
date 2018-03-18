@@ -18,6 +18,9 @@ if [ ! -d $LOG_PATH ]; then
 	mkdir -p "$LOG_PATH"
 fi
 
+# pour envoyer la sortie standard dans les logs
+exec >$PATH_LOG/publish.log
+
 verbose=1 # commenter pour diminuer les logs
 echo_ifverbose() {
   if [[ $verbose ]]; then echo "$@"; fi
