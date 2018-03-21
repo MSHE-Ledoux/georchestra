@@ -18,9 +18,6 @@ if [ ! -d $PATH_LOG ]; then
 	mkdir -p "$PATH_LOG"
 fi
 
-# pour envoyer la sortie standard dans les logs
-exec >$PATH_LOG/publish.log
-
 verbose=1 # commenter pour diminuer les logs
 echo_ifverbose() {
   if [[ $verbose ]]; then echo "$@"; fi
@@ -62,4 +59,4 @@ echo_ifverbose() {
 
 # à inclure dans un crontab
 # toutes les minutes de 8h à 20h, du lundi au vendredi, importe les couches partagées via owncloud dans le geoserver
-# */1 08-20 * * 1-5 /path/sync_data.sh 
+# */1 08-20 * * 1-5 /path/sync_and_publish_data.sh

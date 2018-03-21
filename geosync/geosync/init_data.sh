@@ -11,13 +11,9 @@ source "$paramfile"
 PATH_LOG="/var/log/$logs"
 
 # date dans les logs
-date >> $PATH_LOG/clean.log
+date >> $PATH_LOG/init.log
+date >> $PATH_LOG/init_error.log
+  
+# appel de init.sh
+bash "${SCRIPT_PATH}/init.sh" -v -c 1>>$PATH_LOG/init.log 2>>$PATH_LOG/init_error.log
 
-# appel de clean.sh
-cmd="bash '${SCRIPT_PATH}/clean.sh' -v -d 1>>$PATH_LOG/clean.log 2>>$PATH_LOG/clean_error.log"
-echo $cmd
-eval $cmd
-
-# à inclure dans un crontab
-# tous les soirs de la semaine à 22h, nettoie le geoserver des couches qui ne sont plus partagées avec lui
-# 0 22 * * 1-5   /path/clean_data.sh
