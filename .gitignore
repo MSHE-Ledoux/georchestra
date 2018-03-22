@@ -14,5 +14,7 @@ PostTreatment.groovy
 *.iml
 ./docker-compose.geosync-prod.yml
 ./geosync/georchestra-ouvert/.geosync.conf
+./geosync/georchestra-ouvert/.pgpass
 ./geosync/georchestra-restreint/.geosync.conf
+./geosync/georchestra-restreint/.pgpass
 
