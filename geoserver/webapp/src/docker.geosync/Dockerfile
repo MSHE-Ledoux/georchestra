@@ -6,7 +6,9 @@ USER root
 ADD 02-geosync /docker-entrypoint.d/02-geosync
 RUN chmod +x /docker-entrypoint.d/02-geosync
 
-RUN java -jar "$JETTY_HOME/start.jar" --add-to-startd=jmx,jmx-remote,stats,jndi
+RUN sed -i 's/<\/web-app>/<filter>\n<filter-name>cross-origin<\/filter-name>\n<filter-class>org.eclipse.jetty.servlets.CrossOriginFilter<\/filter-class>\n<\/filter>\n<filter-mapping>\n<filter-name>cross-origin<\/filter-name>\n<url-pattern>\/\*<\/url-pattern>\n<\/filter-mapping>\n<\/web-app>/g' /usr/local/jetty/etc/webdefault.xml
+
+RUN java -jar "$JETTY_HOME/start.jar" --add-to-startd=servlets
 
 ADD . /
 
