@@ -23,6 +23,9 @@ ADD docker/indexes.ldif /tmp/
 ADD memberof.ldif /tmp/
 ADD georchestra.ldif /tmp/
 
+# change default testadmin password
+ADD testadmin.ldif /tmp/
+
 # prepare entrypoint
 USER root
 RUN mkdir /docker-entrypoint.d

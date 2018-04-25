@@ -59,6 +59,11 @@ if [ ! -d /etc/ldap/slapd.d ]; then
     fi
     echo "Populating LDAP tree: OK"
 
+    echo "Changing testadmin default password"
+    perl -p -i -e "s/dc=georchestra,dc=org/${dc_string}/"       /tmp/testadmin.ldif
+    perl -p -i -e "s/TESTADMIN_PASSWORD/${TESTADMIN_PASSWORD}/" /tmp/testadmin.ldif
+    ldapmodify -c -D "cn=admin,dc=georchestra,dc=org" -w "$SLAPD_PASSWORD" -f /tmp/testadmin.ldif
+
     echo "Creating indexes..."
     ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/indexes.ldif
     echo "Indexes: OK"
