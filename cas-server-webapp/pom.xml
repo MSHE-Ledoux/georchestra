@@ -248,7 +248,7 @@
                 <configuration>
                   <target>
                     <delete includeemptydirs="true">
-                      <fileset dir="${project.build.directory}/deb/etc/georchestra">
+                      <fileset defaultexcludes="false" dir="${project.build.directory}/deb/etc/georchestra">
                         <include name="**/*" />
                         <exclude name="cas/**" />
                       </fileset>
@@ -286,7 +286,6 @@
               <packageName>georchestra-cas</packageName>
               <packageDescription>geOrchestra CAS server</packageDescription>
               <packageVersion>${project.packageVersion}</packageVersion>
-              <packageRevision>${maven.build.timestamp}~${build.commit.id.abbrev}</packageRevision>
               <projectOrganization>geOrchestra</projectOrganization>
               <maintainerName>PSC</maintainerName>
               <maintainerEmail>psc@georchestra.org</maintainerEmail>

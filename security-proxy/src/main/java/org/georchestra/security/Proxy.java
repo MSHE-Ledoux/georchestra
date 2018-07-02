@@ -141,7 +141,8 @@ public class Proxy {
      * must be defined
      */
     private String defaultTarget;
-    private String publicHostname = "https://georchestra.mydomain.org/";
+    private String publicHostname = "https://georchestra.mydomain.org";
+
     private Map<String, String> targets = Collections.emptyMap();
     private HeadersManagementStrategy headerManagement = new HeadersManagementStrategy();
     private FilterRequestsStrategy strategyForFilteringRequests = new AcceptAllRequests();
@@ -163,6 +164,10 @@ public class Proxy {
         this.httpClientTimeout = timeout;
     }
 
+    public void setPublicHostname(String publicHostname) {
+        this.publicHostname = publicHostname;
+    }
+
     public Integer getHttpClientTimeout() {
         return httpClientTimeout;
     }
@@ -180,8 +185,6 @@ public class Proxy {
         // init() call
         if ((georchestraConfiguration != null) && (georchestraConfiguration.activated())) {
             logger.info("geOrchestra configuration detected, reconfiguration in progress ...");
-
-            this.publicHostname = georchestraConfiguration.getProperty("public.host");
 
             Properties pTargets = georchestraConfiguration.loadCustomPropertiesFile("targets-mapping");
 
@@ -452,16 +455,6 @@ public class Proxy {
 
     private String buildForwardRequestURL(HttpServletRequest request) {
         String forwardRequestURI = request.getRequestURI();
-        // Makes sure the URL is decoded because some servlet containers
-        // (e.g. tomcat) provides the URL in an encoded manner, whereas
-        // jetty does not.
-        // Also we consider the whole geOrchestra stack to be full utf-8.
-        try {
-            forwardRequestURI = URLDecoder.decode(forwardRequestURI, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Unable to decode the URL, using the encoded version", e);
-        }
-
         forwardRequestURI = forwardRequestURI.replaceAll("//", "/");
 
         return forwardRequestURI;

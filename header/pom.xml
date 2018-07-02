@@ -140,7 +140,7 @@
                 <configuration>
                   <target>
                     <delete includeemptydirs="true">
-                      <fileset dir="${project.build.directory}/deb/etc/georchestra">
+                      <fileset defaultexcludes="false" dir="${project.build.directory}/deb/etc/georchestra">
                         <include name="**/*" />
                         <exclude name="${project.artifactId}/**" />
                       </fileset>
@@ -178,7 +178,6 @@
               <packageName>georchestra-header</packageName>
               <packageDescription>geOrchestra Header</packageDescription>
               <packageVersion>${project.packageVersion}</packageVersion>
-              <packageRevision>${maven.build.timestamp}~${build.commit.id.abbrev}</packageRevision>
               <projectOrganization>geOrchestra</projectOrganization>
               <maintainerName>PSC</maintainerName>
               <maintainerEmail>psc@georchestra.org</maintainerEmail>

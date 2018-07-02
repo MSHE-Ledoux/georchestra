@@ -1012,7 +1012,7 @@
                 <configuration>
                   <target>
                     <delete includeemptydirs="true">
-                      <fileset dir="${project.build.directory}/deb/etc/georchestra">
+                      <fileset defaultexcludes="false" dir="${project.build.directory}/deb/etc/georchestra">
                         <include name="**/*" />
                         <exclude name="geoserver/**" />
                       </fileset>
@@ -1050,7 +1050,6 @@
               <packageName>${packageName}</packageName>
               <packageDescription>geOrchestra GeoServer</packageDescription>
               <packageVersion>${project.packageVersion}</packageVersion>
-              <packageRevision>${maven.build.timestamp}~${build.commit.id.abbrev}</packageRevision>
               <packageDependencies>
                 <packageDependency>debconf</packageDependency>
               </packageDependencies>

@@ -123,11 +123,11 @@ ErrorDocument 503 /errors/50x.html
 ProxyPass /casfailed.jsp http://localhost:8180/casfailed.jsp
 ProxyPassReverse /casfailed.jsp http://localhost:8180/casfailed.jsp
 
-ProxyPass /j_spring_cas_security_check http://localhost:8180/j_spring_cas_security_check 
-ProxyPassReverse /j_spring_cas_security_check http://localhost:8180/j_spring_cas_security_check
+ProxyPass /login/cas http://localhost:8180/login/cas 
+ProxyPassReverse /login/cas http://localhost:8180/login/cas
 
-ProxyPass /j_spring_security_logout http://localhost:8180/j_spring_security_logout 
-ProxyPassReverse /j_spring_security_logout http://localhost:8180/j_spring_security_logout
+ProxyPass /logout http://localhost:8180/logout 
+ProxyPassReverse /logout http://localhost:8180/logout
 
 ProxyPass /gateway http://localhost:8180/gateway
 ProxyPassReverse /gateway http://localhost:8180/gateway
@@ -259,7 +259,7 @@ ProxyPass /console/ http://localhost:8180/console/
 ProxyPassReverse /console/ http://localhost:8180/console/
 
 RewriteCond %{REQUEST_URI} !^/console/manager/public/.*$
-RewriteCond %{REQUEST_URI} ^/console/manager/([home|users|org|orgs|roles|logs|analytics|delegations].*)$
+RewriteCond %{REQUEST_URI} ^/console/manager/([home|users|org|orgs|role|roles|logs|analytics|delegations].*)$
 RewriteRule .* /console/manager/#/%1 [NE,R,L]
 ```
 
