@@ -1,0 +1,50 @@
+<section class="users">
+
+  <browse class="col-md-4 roles aside" roles="users.roles" active-promise="users.activePromise"></browse>
+
+  <div class="col-md-8">
+
+    <input type="text" class="filter-table form-control pull-right" ng-model="users.q" placeholder="{{'role.filter_users' | translate}}"></input>
+    <i class="glyphicon glyphicon-remove-sign filter-table-reset" ng-show="users.q != ''" ng-click="users.q = ''"></i>
+    <h3 ng-if="!users.activeRole" class="roles-title">
+      <ng-pluralize count="users.users.length"
+                    when="{'0': '{{ &quot;role.users_none&quot; | translate }}',
+                           '1': '{} {{ &quot;role.user&quot; | translate }}',
+                           'other': '{} {{ &quot;role.users&quot; | translate }}'}">
+    </h3>
+    <h3 ng-if="users.activeRole" class="roles-title">
+      {{users.activeRole.cn}}
+    </h3>
+    <p ng-if="users.activeRole">
+      <em class="content-description">{{users.activeRole.description}}</em>
+    </p>
+
+    <table class="table table-striped table-condensed">
+
+      <thead>
+        <tr>
+          <th translate>users.user</th>
+          <th translate>users.login</th>
+          <th translate>users.organization</th>
+          <th translate>users.email</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr dir-paginate="user in users.users | filter:users.q | itemsPerPage: users.itemsPerPage">
+          <td>
+            <a ng-link="user({id: user.uid, tab: 'infos'})">{{::user.sn}} {{::user.givenName}}</a>
+          </td>
+          <td>{{::user.uid}}</td>
+          <td>{{::user.org}}</td>
+          <td>{{::user.mail}}</td>
+        </tr>
+      </tbody>
+
+    </table>
+
+    <dir-pagination-controls></dir-pagination-controls>
+
+  </div>
+
+</section>

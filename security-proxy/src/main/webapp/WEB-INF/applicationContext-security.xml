@@ -7,12 +7,16 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/security
-        http://www.springframework.org/schema/security/spring-security-3.2.xsd
+        http://www.springframework.org/schema/security/spring-security-4.2.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:property-placeholder location="/WEB-INF/security-proxy.properties"
-        ignore-resource-not-found="true" ignore-unresolvable="true" order="2" />
+        ignore-resource-not-found="true" ignore-unresolvable="true" order="3" />
+
+    <context:property-placeholder
+            location="file:${georchestra.datadir}/default.properties"
+            ignore-resource-not-found="true" ignore-unresolvable="true" order="2" />
 
     <context:property-placeholder
         location="file:${georchestra.datadir}/security-proxy/security-proxy.properties"
@@ -21,25 +25,27 @@
     <s:http entry-point-ref="casProcessingFilterEntryPoint" request-matcher="regex" realm="${realmName}" disable-url-rewriting="true">
         <s:custom-filter ref="trustAnotherProxy" before="PRE_AUTH_FILTER" />
         <s:custom-filter ref="basicAuthChallengeByUserAgent" before="CAS_FILTER" />
-	    <s:custom-filter ref="casFilter" after="CAS_FILTER" />
+        <s:custom-filter ref="casFilter" after="CAS_FILTER" />
         <s:custom-filter ref="filterSecurityInterceptor" after="EXCEPTION_TRANSLATION_FILTER" />
-	    <!--  <s:http-basic />  -->
-	    <s:anonymous granted-authority="ROLE_ANONYMOUS" />
-	    <s:logout logout-success-url="${logout-success-url}" />
+        <!--  <s:http-basic />  -->
+        <s:headers>
+          <s:frame-options policy="SAMEORIGIN" />
+        </s:headers>
+        <s:anonymous granted-authority="ROLE_ANONYMOUS" />
+        <s:logout logout-success-url="${logout-success-url}" />
+        <s:csrf disabled="true" />
      </s:http>
 
 	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
 		<property name="authenticationManager" ref="authenticationManager" />
 		<property name="accessDecisionManager">
-			<bean id="accessDecisionManager"
-				class="org.springframework.security.access.vote.AffirmativeBased">
-				<property name="decisionVoters">
+			<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+				<constructor-arg>
 					<list>
 						<bean class="org.springframework.security.access.vote.RoleVoter" />
-						<bean
-							class="org.springframework.security.access.vote.AuthenticatedVoter" />
+						<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
 					</list>
-				</property>
+				</constructor-arg>
 			</bean>
 		</property>
 		<property name="securityMetadataSource">
@@ -47,22 +53,22 @@
 				init-method="remap">
 				<property name="requestMap">
 					<map>
-						<!-- default geOrchestra rules (can be overriden in datadir) -->
+						<!-- default geOrchestra rules (can be overridden in datadir) -->
 						<entry key=".*\?.*login.*" value="ROLE_USER,ROLE_GN_EDITOR,ROLE_GN_REVIEWER,ROLE_GN_ADMIN,ROLE_ADMINISTRATOR" />
 						<entry key=".*\?.*casLogin.*" value="ROLE_USER,ROLE_GN_EDITOR,ROLE_GN_REVIEWER,ROLE_GN_ADMIN,ROLE_ADMINISTRATOR" />
 						<entry key="/extractorapp/admin/.*" value="ROLE_ADMINISTRATOR" />
 						<entry key="/extractorapp/jobs/.*" value="ROLE_ADMINISTRATOR" />
-						<entry key="/extractorapp/.*" value="ROLE_MOD_EXTRACTORAPP" />
+						<entry key="/extractorapp/.*" value="ROLE_EXTRACTORAPP" />
 						<entry key="/geofence/.*" value="ROLE_ADMINISTRATOR" />
-						<entry key="/analytics/.*" value="ROLE_MOD_ANALYTICS" />
-						<entry key="/ldapadmin/private/.*" value="ROLE_MOD_LDAPADMIN" />
-						<entry key="/ldapadmin/console/.*" value="ROLE_MOD_LDAPADMIN" />
-						<entry key="/ldapadmin/account/userdetails" value="IS_AUTHENTICATED_FULLY" />
-						<entry key="/ldapadmin/account/changePassword" value="IS_AUTHENTICATED_FULLY" />
-						<entry key="/ldapadmin/.*/emails" value="ROLE_MOD_LDAPADMIN" />
-						<entry key="/ldapadmin/.*/sendEmail" value="ROLE_MOD_LDAPADMIN" />
-						<entry key="/ldapadmin/attachments" value="ROLE_MOD_LDAPADMIN" />
-						<entry key="/ldapadmin/emailTemplates" value="ROLE_MOD_LDAPADMIN" />
+						<entry key="/analytics/.*" value="ROLE_SUPERUSER" />
+						<entry key="/console/private/.*" value="ROLE_SUPERUSER" />
+						<entry key="/console/manager/.*" value="ROLE_SUPERUSER" />
+						<entry key="/console/account/userdetails" value="IS_AUTHENTICATED_FULLY" />
+						<entry key="/console/account/changePassword" value="IS_AUTHENTICATED_FULLY" />
+						<entry key="/console/.*/emails" value="ROLE_SUPERUSER" />
+						<entry key="/console/.*/sendEmail" value="ROLE_SUPERUSER" />
+						<entry key="/console/attachments" value="ROLE_SUPERUSER" />
+						<entry key="/console/emailTemplates" value="ROLE_SUPERUSER" />
 						<entry key="/testPage" value="IS_AUTHENTICATED_FULLY" />
 						<entry key=".*/ogcproxy/.*" value="ROLE_NO_ONE" />
 						<entry key=".*" value="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_GN_EDITOR,ROLE_GN_REVIEWER,ROLE_GN_ADMIN,ROLE_ADMINISTRATOR" />
@@ -74,7 +80,14 @@
 
     <!--  end custom -->
 
+    <bean id="basicAuthenticationEntryPoint"
+      class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+      <property name="realmName" value="${realmName}" />
+    </bean>
+
     <bean id="basicAuthChallengeByUserAgent" class="org.georchestra.security.BasicAuthChallengeByUserAgent" init-method="init">
+        <constructor-arg ref="authenticationManager" />
+        <constructor-arg ref="basicAuthenticationEntryPoint" />
         <property name="challengeUserAgents">
             <list>
             	<!-- uncomment the lines for which you want a preemptive basic auth -->
@@ -85,14 +98,7 @@
             </list>
         </property>
         <property name="ignoreHttps" value="true" />
-        <property name="ignoreFailure" value="false"/>
         <property name="credentialsCharset" value="UTF-8"/>
-        <property name="authenticationManager" ref="authenticationManager"/>
-        <property name="authenticationEntryPoint">
-		    <bean class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
-		        <property name="realmName" value="${realmName}" />
-		    </bean>
-        </property>
     </bean>
 
     <bean id="trustAnotherProxy" class="org.georchestra.security.ProxyTrustAnotherProxy" init-method="init">
@@ -157,7 +163,7 @@
     <bean id="ldapAuthoritiesPopulator" class="org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator">
         <constructor-arg ref="contextSource" />
         <constructor-arg value="${authoritiesBaseDN}" />
-        <property name="groupSearchFilter" value="${groupSearchFilter}"/>
+        <property name="groupSearchFilter" value="${roleSearchFilter}"/>
         <property name="rolePrefix" value="ROLE_"/>
         <property name="searchSubtree" value="true"/>
         <property name="convertToUpperCase" value="true"/>
@@ -217,7 +223,7 @@
         <property name="service" value="${proxyCallback}"/>
         <property name="sendRenew" value="false"/>
     </bean>
-    
+
     <bean
         id="messageSource"
         class="org.springframework.context.support.ReloadableResourceBundleMessageSource"

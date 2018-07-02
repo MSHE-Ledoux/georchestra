@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2017 by the geOrchestra PSC
+ * Copyright (C) 2009-2018 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -42,10 +42,10 @@ GEOR.config = (function() {
     return {
         /**
          * Constant: HEADER_HEIGHT
-         * Integer value representing the header height, as set in the shared maven filters
+         * Integer value representing the header height, as set in the datadir
          * Defaults to 90
          */
-        HEADER_HEIGHT: getCustomParameter("HEADER_HEIGHT", 90),
+        HEADER_HEIGHT: window.headerHeight,
 
         /**
          * Constant: ANONYMOUS
@@ -85,6 +85,28 @@ GEOR.config = (function() {
         ],
 
         /***** Beginning of config options which can be overriden by GEOR.custom *****/
+
+        /**
+         * Constant: WFS_OUTPUTFORMATS_MAPPING
+         * This is a hash mapping WFS GetFeature outputFormats to human-readable
+         * strings.
+         */
+        WFS_OUTPUTFORMATS_MAPPING: getCustomParameter("WFS_OUTPUTFORMATS_MAPPING", {
+            "application/gml+xml; version=3.2": "GML 3.2.1",
+            "text/xml; subtype=gml/3.2": "GML 3.2.1",
+            "gml32": "GML 3.2.1",
+            "text/xml; subtype=gml/3.1.1": "GML 3.1.1",
+            "gml3": "GML 3.0",
+            "text/xml; subtype=gml/2.1.2": "GML 2.1.2",
+            "GML2": "GML 2.1.2",
+            "KML": "KML",
+            "application/vnd.google-earth.kml xml": "KML",
+            "application/vnd.google-earth.kml+xml": "KML",
+            "SHAPE-ZIP": "SHAPE-ZIP",
+            "application/json": "JSON",
+            "json": "JSON",
+            "csv": "CSV"
+        }),
 
         /**
          * Constant: GEOSERVER_WFS_URL
@@ -480,7 +502,7 @@ GEOR.config = (function() {
         /**
          * Constant: LAYER_INFO_TEMPLATE
          * {String} The template used to format the layer tooltip
-         * The available variables are those of a GeoExt record 
+         * The available variables are those of a GeoExt record
          * and protocol, protocol_color, protocol_version, service, layername and short_abstract
          */
         LAYER_INFO_TEMPLATE: getCustomParameter("LAYER_INFO_TEMPLATE", [
@@ -616,8 +638,8 @@ GEOR.config = (function() {
 
         /**
          * Constant: EDITABLE_LAYERS
-         * {RegExp} 
-         * 
+         * {RegExp}
+         *
          */
         EDITABLE_LAYERS: getCustomParameter("EDITABLE_LAYERS",
             /.*/i),
@@ -634,13 +656,13 @@ GEOR.config = (function() {
          * Constant: SEND_MAP_TO
          * {Array} List of menu items configs
          *
-         * Each menu item config **must** have the following properties: 
+         * Each menu item config **must** have the following properties:
          *  - name: the link name. Will be localized by OpenLayers.i18n
-         *  - url: the template url for the link. Must contain one of 
-         *   {context_url}, {map_url} or {id} strings, which will be resp. 
+         *  - url: the template url for the link. Must contain one of
+         *   {context_url}, {map_url} or {id} strings, which will be resp.
          *   replaced by the generated WMC link, the map permalink and the map id.
          *
-         * Each menu item config **may** have the following properties: 
+         * Each menu item config **may** have the following properties:
          *  - qtip: the tip appearing on menu item hover. Will be localized by OpenLayers.i18n
          *  - iconCls: the CSS class which will be appended to the menu item
          */

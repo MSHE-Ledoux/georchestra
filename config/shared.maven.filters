@@ -17,17 +17,17 @@ shared.ldapUrl=ldaps://@shared.ldap.host@:@shared.ldap.port@
 shared.ldap.userSearchBaseDN=ou=users
 shared.ldap.uid=uid
 shared.ldap.userSearchFilter=@shared.ldap.uid@=%u
-shared.ldap.groupSearchBaseDN=ou=roles
-shared.ldap.orgsSearchBaseDN=ou=orgs
+shared.ldap.roleSearchBaseDN=ou=roles
+shared.ldap.orgSearchBaseDN=ou=orgs
 shared.ldap.admin.dn=cn=admin,@shared.ldap.baseDn@
-shared.ldap.groupSearchFilter=(member=uid={1},@shared.ldap.userSearchBaseDN@,@shared.ldap.baseDn@)
-shared.ldap.ldapPendingGroupName=PENDING
-shared.ldap.groupRoleAttribute=cn
+shared.ldap.roleSearchFilter=(member=uid={1},@shared.ldap.userSearchBaseDN@,@shared.ldap.baseDn@)
+shared.ldap.ldapPendingRoleName=PENDING
+shared.ldap.roleRoleAttribute=cn
 
 shared.psql.host=localhost
 shared.psql.port=5432
-shared.psql.user=www-data
-shared.psql.pass=www-data
+shared.psql.user=georchestra
+shared.psql.pass=georchestra
 
 # Configure GeoNetwork db connection to use Postgresql or PostGIS
 # Enable PostGIS using the following (Install PostGIS first)
@@ -54,10 +54,10 @@ shared.ogc.statistics.activated=false
 shared.ogc.statistics.db=georchestra
 shared.ogc.statistics.jdbcurl=jdbc:postgresql://@shared.psql.host@:@shared.psql.port@/@shared.ogc.statistics.db@
 
-shared.ldapadmin.contextpath=/ldapadmin
-shared.ldapadmin.db=georchestra
-shared.ldapadmin.jdbcurl=jdbc:postgresql://@shared.psql.host@:@shared.psql.port@/@shared.ldapadmin.db@
-shared.ldapadmin.warnifuidmodified=true
+shared.console.contextpath=/console
+shared.console.db=georchestra
+shared.console.jdbcurl=jdbc:postgresql://@shared.psql.host@:@shared.psql.port@/@shared.console.db@
+shared.console.warnifuidmodified=true
 
 shared.mapfishapp.db=georchestra
 shared.mapfishapp.jdbcurl=jdbc:postgresql://@shared.psql.host@:@shared.psql.port@/@shared.mapfishapp.db@

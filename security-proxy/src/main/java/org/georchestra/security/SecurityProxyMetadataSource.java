@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2017 by the geOrchestra PSC
+ * Copyright (C) 2009-2018 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -40,8 +40,8 @@ import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.util.RegexRequestMatcher;
-import org.springframework.security.web.util.RequestMatcher;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 

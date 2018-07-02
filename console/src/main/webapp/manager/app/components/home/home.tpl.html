@@ -1,0 +1,87 @@
+<section class="home row">
+
+  <div class="col-md-4">
+    <div class="alerts">
+      <div class="alert alert-info">
+        <i class="glyphicon glyphicon-user pull-right"></i>
+        <i class="glyphicon glyphicon-user pull-right"></i>
+        <a ng-link="users({id: 'all'})" translate>home.users</a>
+      </div>
+      <div class="alert alert-danger" ng-if="home.pending && home.pending.users.length > 0">
+        <a ng-link="users({id: home.pending.cn})">
+          <span><ng-pluralize count="home.pending.users.length"
+                        when="{'1': '{} {{ &quot;home.waiting_user&quot; | translate }}',
+                               'other': '{} {{ &quot;home.waiting_users&quot; | translate }}'}">
+          </span><br>
+          <span class="manage" translate>home.view_manage</span>
+        </a>
+      </div>
+      <div class="alert alert-warning" ng-if="home.expired && home.expired.users.length > 0">
+        <a ng-link="users({id: home.expired.cn})">
+          <span><ng-pluralize count="home.expired.users.length"
+                        when="{'1': '{} {{ &quot;home.expired_user&quot; | translate }}',
+                               'other': '{} {{ &quot;home.expired_users&quot; | translate }}'}">
+          </span><br>
+          <span class="manage" translate>home.view_manage</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="jumbotron">
+      <h1 ng-if="home.connected && home.connected.results.length > 0" ng-cloack>{{::home.connected.results.length}}</h1>
+      <p><ng-pluralize count="home.connected.results.length"
+                       when="{'0': '{{ &quot;home.connected_users_none&quot; | translate }}',
+                              '1': '{{ &quot;home.connected_user&quot; | translate }}',
+                              'other': '{{ &quot;home.connected_users&quot; | translate }}'}">
+      </p>
+      <div ng-if="home.connected.results && home.connected.results.length > 0">
+        <table class="table table-condensed">
+          <thead>
+            <tr>
+              <th translate>home.nb_requests</th>
+              <th translate>home.user</th>
+              <th translate>home.org</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr dir-paginate="user in home.connected.results | itemsPerPage: 10">
+              <td title="{{::user.nb_requests}}">{{::user.nb_requests}}</td>
+              <td title="{{::user.user}}"><a ng-link="user({id: user.user, tab: 'infos'})">{{::user.user}}</a></td>
+              <td title="{{::user.organization}}">{{::user.organization}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <dir-pagination-controls></dir-pagination-controls>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-md-8">
+
+    <stats data="home.requests" type="'line'" config="['date', 'count']" title="'analytics.requests'"></stats>
+
+    <h4 translate>home.logs</h4>
+
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th translate>logs.date</th>
+          <th translate>logs.sender</th>
+          <th translate>logs.type</th>
+          <th translate>logs.target</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="log in home.logs">
+          <td>{{::log.date | logDate}}</td>
+          <td><a ng-link="user({id: log.admin, tab: 'infos'})">{{::log.admin}}</a></td>
+          <td>{{::log.type}}</td>
+          <td><a ng-link="user({id: log.target, tab: 'infos'})">{{::log.target}}</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</section>

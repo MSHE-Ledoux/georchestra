@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.georchestra</groupId>
     <artifactId>root</artifactId>
-    <version>17.12</version>
+    <version>18.06-SNAPSHOT</version>
   </parent>
   <artifactId>georchestra-commons</artifactId>
   <packaging>jar</packaging>
@@ -12,6 +12,12 @@
   <url>http://www.georchestra.org</url>
   <description>Common classes shared across geOrchestra apps</description>
   <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>

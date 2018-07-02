@@ -323,13 +323,6 @@ In ```/var/lib/tomcat-georchestra/conf/server.xml```:
 
 ```
 
-If the ldapadmin webapp is deployed, the connector must also include these options:
-```
-               proxyName="georchestra.mydomain.org"
-               proxyPort="80"
-```
-(where ```georchestra.mydomain.org``` is your server FQDN)
-
 ### Start the instance
 
 ```
@@ -465,7 +458,7 @@ properties['proxy.mapping'] = """
 <entry key="geowebcache"   value="proxyDefaultTarget/geowebcache/" />
 <entry key="geofence"      value="proxyDefaultTarget/geofence/" />
 <entry key="header"        value="proxyDefaultTarget/header/" />
-<entry key="ldapadmin"     value="proxyDefaultTarget/ldapadmin/" />
+<entry key="console"     value="proxyDefaultTarget/console/" />
 <entry key="mapfishapp"    value="proxyDefaultTarget/mapfishapp/" />
 <entry key="static"        value="proxyDefaultTarget/header/" />""".replaceAll("\n|\t","").replaceAll("proxyDefaultTarget",proxyDefaultTarget)
 ```

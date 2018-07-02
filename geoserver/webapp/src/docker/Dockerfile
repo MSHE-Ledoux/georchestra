@@ -2,7 +2,7 @@ FROM jetty:9-jre8
 
 ENV XMS=1536M XMX=8G
 
-RUN java -jar "$JETTY_HOME/start.jar" --add-to-startd=jmx,jmx-remote,stats,jndi
+RUN java -jar "$JETTY_HOME/start.jar" --create-startd --add-to-start=jmx,jmx-remote,stats,jndi
 
 ADD . /
 
@@ -30,6 +30,7 @@ VOLUME [ "/mnt/geoserver_datadir", "/mnt/geoserver_geodata", "/mnt/geoserver_til
 
 CMD ["sh", "-c", "exec java -Djava.io.tmpdir=/tmp/jetty \
 -Dgeofence-ovr=file:/etc/georchestra/geoserver/geofence/geofence-datasource-ovr.properties \
+-Dgeorchestra.datadir=/etc/georchestra \
 -DGEOSERVER_DATA_DIR=/mnt/geoserver_datadir \
 -DGEOWEBCACHE_CACHE_DIR=/mnt/geoserver_tiles \
 -DENABLE_JSONP=true \

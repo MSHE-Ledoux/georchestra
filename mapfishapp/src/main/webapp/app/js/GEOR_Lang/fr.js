@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2017 by the geOrchestra PSC
+ * Copyright (C) 2009-2018 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -227,7 +227,8 @@ OpenLayers.Lang.fr = OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     "Show metadata": "Afficher les métadonnées",
     "Edit symbology": "Éditer la symbologie",
     "Build a query": "Construire une requête",
-    "Download data": "Extraire les données",
+    "Download layer": "Télécharger la couche",
+    "Extract data": "Extraire les données",
     "Choose a style": "Choisir un style",
     "Modify format": "Modifier le format",
     "Delete this layer": "Supprimer cette couche",

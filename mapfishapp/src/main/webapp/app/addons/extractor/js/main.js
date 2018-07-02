@@ -1,10 +1,15 @@
 Ext.namespace("GEOR.Addons");
 
 /*
- * TODO: 
+ * TODO:
  * - handle ACLs
- * - wizard (1 choose layers (NOK report here) 2 choose extent 3 choose formats 4 enter email )
- * - modifyFeature control improved: non symetrical mode when OpenLayers.Control.ModifyFeature.RESIZE
+ * - wizard
+ *    1 choose layers
+ *    2 choose extent
+ *    3 choose formats
+ *    4 enter email
+ * - modifyFeature control improved: non symetrical mode when
+ *   using OpenLayers.Control.ModifyFeature.RESIZE
  */
 GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
     win: null,
@@ -17,6 +22,7 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
     rasterFormatField: null,
     resField: null,
     emailField: null,
+    layerRecord: null,
 
     /**
      * Method: init
@@ -27,7 +33,8 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
     init: function(record) {
         this.jsonFormat = new OpenLayers.Format.JSON();
         var style = {
-            externalGraphic: GEOR.config.PATHNAME + "/app/addons/extractor/img/shading.png",
+            externalGraphic: GEOR.config.PATHNAME +
+                "/app/addons/extractor/img/shading.png",
             graphicWidth: 16,
             graphicHeight: 16,
             graphicOpacity: 1,
@@ -45,13 +52,6 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
                 "default": Ext.applyIf({}, style),
                 "select": Ext.applyIf({}, style)
             })
-        });
-        this.modifyControl = new OpenLayers.Control.ModifyFeature(this.layer, {
-            standalone: true,
-            mode: OpenLayers.Control.ModifyFeature.RESHAPE | 
-                OpenLayers.Control.ModifyFeature.RESIZE | 
-                OpenLayers.Control.ModifyFeature.DRAG,
-            autoActivate: true
         });
 
         if (this.target) {
@@ -74,11 +74,15 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
                 scope: this
             });
         }
-        if (this.options.showWindowOnStartup == true) {
+        var o = GEOR.util.splitURL(window.location.href);
+        if (this.options.showWindowOnStartup == true &&
+            o.params.hasOwnProperty("ADDONS") &&
+            o.params.ADDONS.indexOf(record.id) > -1) {
+
             this.showWindow();
         }
     },
-    
+
     createWindow: function() {
         var FIELD_WIDTH = 170,
             base = {
@@ -104,6 +108,8 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
             name: "vectorFormat",
             fieldLabel: OpenLayers.i18n("Format for vectors"),
             value: this.options.defaultVectorFormat,
+            disabled: (this.layerRecord ?
+                this.layerRecord.get('WCS_typeName') : false),
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: this.options.vectorFormatData
@@ -113,6 +119,8 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
             name: "rasterFormat",
             fieldLabel: OpenLayers.i18n("Format for rasters"),
             value: this.options.defaultRasterFormat,
+            disabled: (this.layerRecord ?
+                this.layerRecord.get('WFS_typeName') : false),
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: this.options.rasterFormatData
@@ -124,24 +132,30 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
             width: FIELD_WIDTH,
             labelSeparator: OpenLayers.i18n("labelSeparator"),
             value: this.options.defaultRasterResolution,
+            disabled: (this.layerRecord ?
+                this.layerRecord.get('WFS_typeName') : false),
             decimalPrecision: 0
         });
         this.emailField = new Ext.form.TextField({
             name: "email",
             vtype: "email",
-            vtypeText: OpenLayers.i18n('This field should be an e-mail address in the format user@domain.com'),
+            vtypeText: OpenLayers.i18n('This field should be an e-mail address'+
+                ' in the format user@domain.com'),
             allowBlank: false,
             width: FIELD_WIDTH,
             labelSeparator: OpenLayers.i18n("labelSeparator"),
             value: GEOR.config.USEREMAIL || "",
             fieldLabel: OpenLayers.i18n("Email")
         });
+        // Extracting all layers or a single one ?
+        var title = OpenLayers.i18n("addon_extractor_popup_title") +
+            (this.layerRecord ? " - " + this.layerRecord.get('title') : "");
         return new Ext.Window({
             closable: true,
-            closeAction: 'hide',
+            closeAction: 'close',
             width: 330,
             height: 270,
-            title: OpenLayers.i18n("addon_extractor_popup_title"),
+            title: title,
             border: false,
             buttonAlign: 'left',
             layout: 'fit',
@@ -150,17 +164,18 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
                 labelWidth: 120,
                 bodyStyle: "padding:5px;",
                 items: [
-                    this.srsField, 
-                    this.vectorFormatField, 
-                    this.rasterFormatField, 
-                    this.resField, 
+                    this.srsField,
+                    this.vectorFormatField,
+                    this.rasterFormatField,
+                    this.resField,
                     this.emailField
                 ]
             }],
             fbar: ['->', {
                 text: OpenLayers.i18n("Close"),
                 handler: function() {
-                    this.win.hide();
+                    this.win.close();
+                    this.win = null;
                 },
                 scope: this
             }, {
@@ -181,22 +196,34 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
                     this.map.zoomToExtent(
                         this.layer.features[0].geometry.getBounds().scale(1.2)
                     );
+                    this.modifyControl = new OpenLayers.Control.ModifyFeature(
+                        this.layer, {
+                        standalone: true,
+                        mode: OpenLayers.Control.ModifyFeature.RESHAPE |
+                            OpenLayers.Control.ModifyFeature.RESIZE |
+                            OpenLayers.Control.ModifyFeature.DRAG,
+                        autoActivate: true
+                    });
                     this.map.addControl(this.modifyControl);
                     this.modifyControl.selectFeature(this.layer.features[0]);
                 },
                 "hide": function() {
-                    this.map.removeLayer(this.layer);
-                    this.modifyControl.unselectFeature(this.layer.features[0]);
                     this.map.removeControl(this.modifyControl);
+                    this.modifyControl.unselectFeature(this.layer.features[0]);
+                    this.map.removeLayer(this.layer);
                     this.item && this.item.setChecked(false);
                     this.components && this.components.toggle(false);
+                    this.layerRecord = null;
                 },
                 scope: this
             }
         });
     },
 
-    showWindow: function() {
+    showWindow: function(options) {
+        if (options && options.record) {
+            this.layerRecord = options.record;
+        }
         if (!this.win) {
             this.win = this.createWindow();
         }
@@ -224,10 +251,11 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
             url: this.options.serviceURL,
             success: function(response) {
                 if (response.responseText &&
-                    response.responseText.indexOf('<success>true</success>') > 0) {
+                    response.responseText.indexOf('<success>true</success>')>0){
                     this.win.hide();
                     GEOR.util.infoDialog({
-                        msg: OpenLayers.i18n('The extraction request succeeded, check your email.')
+                        msg: OpenLayers.i18n('The extraction request succeeded'+
+                            ', check your email.')
                     });
                 } else {
                     GEOR.util.errorDialog({
@@ -249,8 +277,11 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
         if (!this.emailField.isValid()) {
             return;
         }
-        var okLayers = [];
-        this.mapPanel.layers.each(function(r) {
+        var okLayers = [],
+            // extract only one layer or all visible ones ?
+            layers = this.layerRecord ?
+                [this.layerRecord] : this.mapPanel.layers;
+        Ext.each(layers, function(r) {
             var layer = r.getLayer();
             if (!layer.getVisibility() || !layer.url) {
                 return;
@@ -284,7 +315,7 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
         this.layer = null;
         this.jsonFormat = null;
         this.modifyControl = null;
-        
+
         GEOR.Addons.Base.prototype.destroy.call(this);
     }
 });

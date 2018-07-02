@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2017 by the geOrchestra PSC
+ * Copyright (C) 2009-2018 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -336,8 +336,7 @@ public class CustomAuthenticationProvider extends AbstractLdapAuthenticationProv
         } catch (IncorrectResultSizeDataAccessException incorrectResults) {
             if (incorrectResults.getActualSize() == 0) {
                 UsernameNotFoundException userNameNotFoundException = new UsernameNotFoundException(
-                        "User " + username + " not found in directory.",
-                        username);
+                        "User " + username + " not found in directory.");
                 userNameNotFoundException.initCause(incorrectResults);
                 throw badCredentials(userNameNotFoundException);
             }

@@ -4,14 +4,14 @@
   <parent>
     <groupId>org.georchestra</groupId>
     <artifactId>geoserver-root</artifactId>
-    <version>17.12</version>
+    <version>18.06-SNAPSHOT</version>
   </parent>
   <artifactId>geoserver-webapp</artifactId>
   <packaging>war</packaging>
   <name>geOrchestra GeoServer Web Application</name>
   <properties>
     <packageName>georchestra-geoserver</packageName>
-    <packageDatadirScmVersion>17.12</packageDatadirScmVersion>
+    <packageDatadirScmVersion>master</packageDatadirScmVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -975,8 +975,10 @@
     </profile>
     <profile>
       <id>debianPackage</id>
+      <properties>
+        <server>generic</server>
+      </properties>
       <build>
-        <finalName>geoserver-generic</finalName>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -1002,7 +1004,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.6</version>
+            <version>1.7</version>
             <executions>
               <execution>
                 <id>remove-useless-directories</id>
@@ -1010,7 +1012,7 @@
                 <configuration>
                   <target>
                     <delete includeemptydirs="true">
-                      <fileset dir="${project.build.directory}/deb/etc/georchestra">
+                      <fileset defaultexcludes="false" dir="${project.build.directory}/deb/etc/georchestra">
                         <include name="**/*" />
                         <exclude name="geoserver/**" />
                       </fileset>
@@ -1047,6 +1049,7 @@
             <configuration>
               <packageName>${packageName}</packageName>
               <packageDescription>geOrchestra GeoServer</packageDescription>
+              <packageVersion>${project.packageVersion}</packageVersion>
               <packageDependencies>
                 <packageDependency>debconf</packageDependency>
               </packageDependencies>
@@ -1055,7 +1058,6 @@
               <maintainerName>PSC</maintainerName>
               <maintainerEmail>psc@georchestra.org</maintainerEmail>
               <excludeAllDependencies>true</excludeAllDependencies>
-              <snapshotRevisionFile>${project.build.directory}</snapshotRevisionFile>
             </configuration>
           </plugin>
         </plugins>
@@ -1258,18 +1260,38 @@
               <groupId>org.geoserver.geofence</groupId>
               <artifactId>geofence-model</artifactId>
             </exclusion>
+            <exclusion>
+              <groupId>com.vividsolutions</groupId>
+              <artifactId>jts</artifactId>
+            </exclusion>
           </exclusions>
         </dependency>
         <dependency>
           <groupId>org.geoserver.community</groupId>
           <artifactId>gs-geofence-server</artifactId>
           <version>${gs.version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>cglib</groupId>
+              <artifactId>cglib</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>com.vividsolutions</groupId>
+              <artifactId>jts</artifactId>
+            </exclusion>
+          </exclusions>
         </dependency>
         <!-- These are needed in the GeoFence geOrchestra integration but not mandatory in default GF setups -->
         <dependency>
           <groupId>org.hibernatespatial</groupId>
           <artifactId>hibernate-spatial-postgis</artifactId>
           <version>${hibernate-spatial-version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>com.vividsolutions</groupId>
+              <artifactId>jts</artifactId>
+            </exclusion>
+          </exclusions>
         </dependency>
         <dependency>
           <groupId>org.postgis</groupId>

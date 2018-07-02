@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2017 by the geOrchestra PSC
+ * Copyright (C) 2009-2018 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -58,6 +58,7 @@ public class EmailFactoryDefault extends AbstractEmailFactory {
                 LOG.debug("preparing to send extraction result email");
                 String msg = new String(msgDone);
                 if (msg != null) {
+                    msg = msg.replaceAll("\\{publicUrl\\}", this.georConfig.getProperty("publicUrl"));
                     msg = msg.replace("{link}", url);
                     msg = msg.replace("{emails}", Arrays.toString(recipients));
                     msg = msg.replace("{expiry}", String.valueOf(expiry));

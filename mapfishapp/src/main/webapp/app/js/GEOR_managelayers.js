@@ -21,6 +21,7 @@
  * @include GeoExt/widgets/tree/LayerContainer.js
  * @include GeoExt/widgets/tree/TreeNodeUIEventMixin.js
  * @include OpenLayers/Format/JSON.js
+ * @include OpenLayers/Format/WFSCapabilities.js
  * @include GEOR_layerfinder.js
  * @include GEOR_edit.js
  * @include GEOR_ows.js
@@ -317,13 +318,14 @@ GEOR.managelayers = (function() {
     var createInfoButton = function(layerRecord) {
         var layer = layerRecord.get("layer"),
             isWMS = layerRecord.get("type") == "WMS",
-            isWMTS = layerRecord.get("type") == "WMTS";
+            isWMTS = layerRecord.get("type") == "WMTS",
+            isVector = layer instanceof OpenLayers.Layer.Vector;
         return {
             xtype: 'button',
             // for vector layers, the button is always enabled:
             disabled: (isWMS || isWMTS) ?
                 !(layerRecord.get("queryable")) :
-                false,
+                !isVector, // account for eg TMS layers added by addons
             iconCls: 'geor-btn-info',
             allowDepress: true,
             enableToggle: true,
@@ -500,31 +502,6 @@ GEOR.managelayers = (function() {
     };
 
     /**
-     * Method: submitData
-     * If required, this method creates the form and uses it to
-     * submit the objet passed as a parameter
-     *
-     * Parameters:
-     * o - {Object} JS object which should be serialized + submitted
-     */
-    var submitData = function(o) {
-        form = form || Ext.DomHelper.append(Ext.getBody(), {
-            tag: "form",
-            action: "/extractorapp/",
-            target: "_blank",
-            method: "post"
-        });
-        var input = form[0] || Ext.DomHelper.append(form, {
-            tag: "input",
-            type: "hidden",
-            name: "data"
-        });
-        jsonFormat = jsonFormat || new OpenLayers.Format.JSON();
-        input.value = jsonFormat.write(o);
-        form.submit();
-    };
-
-    /**
      * Method: editHandler
      * Callback executed on edit menu item clicked
      *
@@ -610,6 +587,61 @@ GEOR.managelayers = (function() {
         }
     };
 
+    /**
+     * Method: createDLMenuItems
+     *
+     * Parameters:
+     * layerRecord - {GeoExt.data.LayerRecord}
+     *
+     * Returns:
+     * {Array} An array of menu items, empty if the WFS getCapabilities operation
+     * is still pending.
+     */
+    var createDLMenuItems = function(layerRecord) {
+        var menuItems = [];
+        // create menu items here, assuming the layerRecord has been hydrated
+        // elsewhere with the WFS capabilities response
+        var caps = layerRecord.get("_wfs_capabilities");
+        if (!caps) {
+            return [];
+        }
+        var allowedValues = {}, gf;
+        try {
+            gf = caps.operationsMetadata.GetFeature;
+            allowedValues = gf.parameters.outputFormat.allowedValues;
+        } catch(e) {
+            return [];
+        }
+        var mapping = {}, availableFormats = [];
+        Ext.iterate(allowedValues, function(format, allowed){
+            if (GEOR.config.WFS_OUTPUTFORMATS_MAPPING.hasOwnProperty(format)) {
+                mapping[GEOR.config.WFS_OUTPUTFORMATS_MAPPING[format]] = format;
+            }
+        });
+        Ext.iterate(mapping, function(displaystring, formatstring){
+            availableFormats.push(displaystring);
+        });
+        availableFormats.sort(GEOR.util.sortFn);
+        Ext.each(availableFormats, function(displayString){
+            menuItems.push({
+                text: displayString,
+                handler: function(item) {
+                    var url = OpenLayers.Util.urlAppend(
+                        layerRecord.get("WFS_URL"),
+                        OpenLayers.Util.getParameterString({
+                            SERVICE: "WFS",
+                            REQUEST: "GetFeature",
+                            VERSION: "1.0.0",
+                            TYPENAME: layerRecord.get("WFS_typeName"),
+                            OUTPUTFORMAT: mapping[displayString]
+                        })
+                    );
+                    window.open(url);
+                }
+            });
+        });
+        return menuItems;
+    };
 
     /**
      * Method: createMenuItems
@@ -793,22 +825,83 @@ GEOR.managelayers = (function() {
         }
 
         if ((hasEquivalentWFS || hasEquivalentWCS || isWFS)
-            && (GEOR.config.ROLES.indexOf("ROLE_MOD_EXTRACTORAPP") >= 0)) {
+            && GEOR.Addons.Extractor
+            && GEOR.tools.getAddonsState()["extractor_0"]
+            && (GEOR.config.ROLES.indexOf("ROLE_EXTRACTORAPP") >= 0)) {
 
             insertSep();
             menuItems.push({
-                iconCls: 'geor-btn-download',
-                text: tr("Download data"),
+                iconCls: 'geor-btn-extract',
+                text: tr("Extract data"),
                 handler: function() {
-                    submitData({
-                        layers: [{
-                            layername: layerRecord.get('name'),
-                            metadataURL: layer.metadataURL || "",
-                            owstype: isWMS ? "WMS" : "WFS",
-                            owsurl: isWMS ? layer.url : layer.protocol.url
-                        }]
+                    var addon = GEOR.tools.getAddon("extractor_0");
+                    addon && addon.showWindow({
+                        record: layerRecord
                     });
                 }
+            });
+        }
+
+
+        if (hasEquivalentWFS || isWFS) {
+            menuItems.push({
+                iconCls: 'geor-btn-download',
+                text: tr("Download layer"),
+                menu: new Ext.menu.Menu({
+                    items: [],
+                    ignoreParentClicks: true,
+                    listeners: {
+                        "beforeshow": function(menu) {
+                            if (menu.items.length) {
+                                // allow menu appearance
+                                return true;
+                            }
+                            // launch a WFS capabilities request &
+                            // hydrate layerRecord
+                            var r = layerRecord,
+                                format = new OpenLayers.Format.WFSCapabilities();
+
+                            var pseudoRecord = {
+                                typeName: isWFS ?
+                                    r.get("WFS_typeName") : r.get("name"),
+                                owsURL: isWFS ?
+                                    layer.protocol.url : r.get("WFS_URL")
+                            };
+                            GEOR.waiter.show();
+                            OpenLayers.Request.GET({
+                                url: GEOR.ows.getWFSCapURL(pseudoRecord),
+                                success: function(response) {
+                                    try {
+                                        var c = format.read(response.responseXML
+                                            || response.responseText);
+                                        layerRecord.set("_wfs_capabilities", c);
+                                    } catch(e) {}
+                                },
+                                scope: this
+                            });
+
+                            // wait for the WFS getCapabilities to be finished
+                            var task = Ext.TaskMgr.start({
+                                run: function() {
+                                    var menuItems = createDLMenuItems(
+                                        layerRecord);
+                                    menu.removeAll();
+                                    if (!menuItems.length) {
+                                        menu.add(tr("Loading..."));
+                                    } else {
+                                        // create + add menu items
+                                        Ext.each(menuItems, function(item) {
+                                            menu.add(item);
+                                        });
+                                        // stop this task
+                                        Ext.TaskMgr.stop(task);
+                                    }
+                                },
+                                interval: 100
+                            });
+                        }
+                    }
+                })
             });
         }
 

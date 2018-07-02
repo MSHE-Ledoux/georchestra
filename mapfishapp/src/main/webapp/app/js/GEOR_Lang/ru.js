@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2017 by the geOrchestra PSC
+ * Copyright (C) 2009-2018 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -185,7 +185,8 @@ OpenLayers.Lang.ru = OpenLayers.Util.extend(OpenLayers.Lang.ru, {
     "Show metadata": "Показать метаданные",
     "Edit symbology": "Редактировать символику",
     "Build a query": "Сделать запрос",
-    "Download data": "Скачать данные",
+    "Download layer": "Скачать данные",
+    //"Extract data": "Extraire les données",
     "Choose a style": "Выбрать стиль",
     "Modify format": "Изменить формат",
     "Tiled mode" : "Режим черепицы",

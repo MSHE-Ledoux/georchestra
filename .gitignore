@@ -5,7 +5,6 @@
 */src/main/webapp/build/
 */jsbuild/distribute-*.tar.gz
 */jsbuild/setuptools-*.egg
-*/src/main/webapp/WEB-INF/jsp/header.jsp
 PostTreatment.groovy
 **/.project
 **/.classpath
@@ -17,4 +16,4 @@ PostTreatment.groovy
 ./geosync/georchestra-ouvert/.pgpass
 ./geosync/georchestra-restreint/.geosync.conf
 ./geosync/georchestra-restreint/.pgpass
-
+*~

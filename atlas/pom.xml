@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.georchestra</groupId>
         <artifactId>root</artifactId>
-        <version>17.12</version>
+        <version>18.06-SNAPSHOT</version>
     </parent>
     <artifactId>atlas</artifactId>
     <packaging>war</packaging>
@@ -15,7 +15,7 @@
         <geotools.version>11.0</geotools.version>
         <spring.version>4.1.8.RELEASE</spring.version>
         <spring.data.version>1.9.1.RELEASE</spring.data.version>
-        <packageDatadirScmVersion>17.12</packageDatadirScmVersion>
+        <packageDatadirScmVersion>master</packageDatadirScmVersion>
     </properties>
     <dependencies>
         <!-- Camel dependencies -->
@@ -418,7 +418,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>1.7</version>
                         <executions>
                             <execution>
                                 <id>remove-useless-directories</id>
@@ -426,7 +426,7 @@
                                 <configuration>
                                     <target>
                                         <delete includeemptydirs="true">
-                                            <fileset dir="${project.build.directory}/deb/etc/georchestra">
+                                            <fileset defaultexcludes="false" dir="${project.build.directory}/deb/etc/georchestra">
                                                 <include name="**/*" />
                                                 <exclude name="atlas/**" />
                                             </fileset>
@@ -465,11 +465,11 @@
                         <configuration>
                             <packageName>georchestra-atlas</packageName>
                             <packageDescription>geOrchestra Atlas</packageDescription>
+                            <packageVersion>${project.packageVersion}</packageVersion>
                             <projectOrganization>geOrchestra</projectOrganization>
                             <maintainerName>PSC</maintainerName>
                             <maintainerEmail>psc@georchestra.org</maintainerEmail>
                             <excludeAllDependencies>true</excludeAllDependencies>
-                            <snapshotRevisionFile>${project.build.directory}</snapshotRevisionFile>
                         </configuration>
                     </plugin>
                 </plugins>

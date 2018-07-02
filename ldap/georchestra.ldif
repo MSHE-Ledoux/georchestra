@@ -114,44 +114,21 @@ cn: PENDING
 ou: 2
 description: This group does not grant any right inside the SDI. Users in this group are requesting a fully fledged account.
 
-# MOD
-dn: cn=MOD,ou=roles,dc=georchestra,dc=org
+# SUPERUSER, roles, georchestra.org
+dn: cn=SUPERUSER,ou=roles,dc=georchestra,dc=org
 objectClass: top
 objectClass: groupOfMembers
-cn: MOD
-ou: 24
-
-# GN
-dn: cn=GN,ou=roles,dc=georchestra,dc=org
-objectClass: top
-objectClass: groupOfMembers
-cn: GN
-ou: 25
-
-# MOD_LDAPADMIN, roles, georchestra.org
-dn: cn=MOD_LDAPADMIN,ou=roles,dc=georchestra,dc=org
-objectClass: top
-objectClass: groupOfMembers
-cn: MOD_LDAPADMIN
+cn: SUPERUSER
 ou: 10
 description: This group grants access to the LDAPadmin private User Interface
 member: uid=testadmin,ou=users,dc=georchestra,dc=org
 
-# MOD_ANALYTICS, roles, georchestra.org
-dn: cn=MOD_ANALYTICS,ou=roles,dc=georchestra,dc=org
+# EXTRACTORAPP, roles, georchestra.org
+dn: cn=EXTRACTORAPP,ou=roles,dc=georchestra,dc=org
 objectClass: top
 objectClass: groupOfMembers
-cn: MOD_ANALYTICS
+cn: EXTRACTORAPP
 ou: 11
-description: This group grants access to the Analytics application
-member: uid=testadmin,ou=users,dc=georchestra,dc=org
-
-# MOD_EXTRACTORAPP, roles, georchestra.org
-dn: cn=MOD_EXTRACTORAPP,ou=roles,dc=georchestra,dc=org
-objectClass: top
-objectClass: groupOfMembers
-cn: MOD_EXTRACTORAPP
-ou: 12
 description: This group grants access to the Extractorapp application
 member: uid=testadmin,ou=users,dc=georchestra,dc=org
 
@@ -195,6 +172,16 @@ member: uid=testeditor,ou=users,dc=georchestra,dc=org
 member: uid=testreviewer,ou=users,dc=georchestra,dc=org
 member: uid=testadmin,ou=users,dc=georchestra,dc=org
 
+# ORGADMIN, roles, georchestra.org
+dn: cn=ORGADMIN,ou=roles,dc=georchestra,dc=org
+objectClass: top
+objectClass: groupOfMembers
+cn: ORGADMIN
+ou: 24
+description: This role is automatically granted to all users holding an admin delegation
+member: uid=testuser,ou=users,dc=georchestra,dc=org
+member: uid=testeditor,ou=users,dc=georchestra,dc=org
+
 # orgs, georchestra.org
 dn: ou=orgs,dc=georchestra,dc=org
 objectClass: organizationalUnit
@@ -219,3 +206,40 @@ member: uid=testuser,ou=users,dc=georchestra,dc=org
 o: Project Steering Committee
 ou: PSC
 seeAlso: o=psc,ou=orgs,dc=georchestra,dc=org
+
+
+dn: o=c2c,ou=orgs,dc=georchestra,dc=org
+objectClass: organization
+objectClass: top
+o: c2c
+businessCategory: COMPANY
+postalAddress: 18 Rue du lac Saint André, 73000 Chambéry
+
+dn: cn=c2c,ou=orgs,dc=georchestra,dc=org
+objectClass: groupOfMembers
+objectClass: top
+cn: c2c
+businessCategory: REGISTERED
+description: 4184
+member: uid=testeditor,ou=users,dc=georchestra,dc=org
+o: Camptocamp
+ou: C2C
+seeAlso: o=c2c,ou=orgs,dc=georchestra,dc=org
+
+dn: o=cra,ou=orgs,dc=georchestra,dc=org
+objectClass: organization
+objectClass: top
+o: cra
+businessCategory: COMPANY
+postalAddress: Rue Jean Wenger - Valentin, 67000 Strasbourg
+
+dn: cn=cra,ou=orgs,dc=georchestra,dc=org
+objectClass: groupOfMembers
+objectClass: top
+cn: cra
+businessCategory: REGISTERED
+description: 4184
+member: uid=testreviewer,ou=users,dc=georchestra,dc=org
+o: Conseil régional d'Alsace
+ou: CRA
+seeAlso: o=cra,ou=orgs,dc=georchestra,dc=org

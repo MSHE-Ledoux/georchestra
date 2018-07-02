@@ -50,7 +50,7 @@ GEOR.map = (function() {
     observable.addEvents(
         /**
          * Event: describelayer
-         * Fires when a layer is described 
+         * Fires when a layer is described
          *
          * Listener arguments:
          * record - {GeoExt.data.LayerRecord}
@@ -183,7 +183,7 @@ GEOR.map = (function() {
         // see GEOR.initmap and startup WMC file
         var options = {
             projection: GEOR.config.MAP_SRS,
-            units: tr("m"),
+            units: "m",
             allOverlays: true,
             scales: SCALES,
             maxExtent: new OpenLayers.Bounds(
