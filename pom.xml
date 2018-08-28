@@ -4,7 +4,7 @@
   <groupId>org.georchestra</groupId>
   <artifactId>root</artifactId>
   <packaging>pom</packaging>
-  <version>18.06-SNAPSHOT</version>
+  <version>18.12-SNAPSHOT</version>
   <name>Root project of the geOrchestra SDI</name>
   <url>http://maven.apache.org</url>
   <organization>
@@ -108,7 +108,7 @@
        <plugin>
          <groupId>org.owasp</groupId>
          <artifactId>dependency-check-maven</artifactId>
-         <version>3.0.1</version>
+         <version>3.2.1</version>
        </plugin>
        <plugin>
          <groupId>org.apache.maven.plugins</groupId>
@@ -546,7 +546,7 @@
         <checksumPolicy>ignore</checksumPolicy>
       </snapshots>
       <id>georchestra</id>
-      <url>https://packages.georchestra.org/maven/repository</url>
+      <url>https://packages.georchestra.org/artifactory/maven</url>
     </repository>
     <!-- geotools -->
     <repository>
