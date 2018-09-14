@@ -12,3 +12,6 @@ PostTreatment.groovy
 .idea/
 *.iml
 *~
+**/.geosync.conf
+**/.pgpass
+
