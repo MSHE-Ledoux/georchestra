@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     python-dev \
     python-owslib \
     python-lxml \
+    python-requests \
+    python-httplib2 \
     libxml2-utils \
     ca-certificates \
     curl \
@@ -34,6 +36,10 @@ RUN apt-get update && apt-get install -y \
     owncloud-client-cmd \
     less vim colordiff openssh-client \
  && rm -rf /var/lib/apt/lists/*
+
+# bug de owncloud-client-cmd qui est livré sans sync-exclude.lst
+# Cannot load system exclude list or list supplied via --exclude
+ADD sync-exclude.lst /etc/owncloud-client/
 
 # bash_profile and bashrc 
 ADD dot.bash_profile /root/.bash_profile

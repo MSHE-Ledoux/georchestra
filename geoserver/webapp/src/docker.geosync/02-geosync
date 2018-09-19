@@ -15,3 +15,6 @@ mkdir /mnt/geoserver_datadir/data/geosync-restreint/geosync_shp_rsct
 
 chown -R jetty:jetty /mnt/geoserver_datadir/data
 
+# modification de webdefault.xml
+perl -p -i -e "s/<\/web-app>/<Ernest><\/Ernest>\n<\/web-app>/" /usr/local/jetty/etc/webdefault.xml
+

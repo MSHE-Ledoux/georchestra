@@ -4,17 +4,19 @@
 
 FROM dinkel/openldap
 
-# 
+# set timezone
 RUN echo $TZ > /etc/timezone && \
-    apt-get update && apt-get install -y tzdata && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata && \
     rm /etc/localtime && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata && \
-    apt-get clean
+    dpkg-reconfigure -f noninteractive tzdata
 
 # add packages
-RUN apt-get install -y ldap-utils python python-ldap cron sasl2-bin procps
-RUN rm -rf /var/lib/apt/lists/*
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install ldap-utils
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install python python-ldap cron sasl2-bin procps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # add ldif files for georchestra
 USER openldap
@@ -22,6 +24,9 @@ ADD groupofmembers.ldif /etc/ldap.dist/modules/
 ADD docker/indexes.ldif /tmp/
 ADD memberof.ldif /tmp/
 ADD georchestra.ldif /tmp/
+
+# change default testadmin password
+ADD testadmin.ldif /tmp/
 
 # prepare entrypoint
 USER root

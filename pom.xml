@@ -4,7 +4,7 @@
   <groupId>org.georchestra</groupId>
   <artifactId>root</artifactId>
   <packaging>pom</packaging>
-  <version>18.06-SNAPSHOT</version>
+  <version>18.06</version>
   <name>Root project of the geOrchestra SDI</name>
   <url>http://maven.apache.org</url>
   <organization>
@@ -37,7 +37,7 @@
 
        def server=project.properties['server']
        def subTarget=project.properties['subTarget']
-       
+
        def params = new Parameters(
            project: project,
            target: server,
@@ -46,7 +46,7 @@
            ant: ant
        )
        params.init(false)
-       
+
        new PostTreatment().run(this, log, ant, project.basedir, params.projectDir, server, subTarget, project.build.directory)
 
 ]]></postTreatmentScript>
@@ -108,7 +108,7 @@
        <plugin>
          <groupId>org.owasp</groupId>
          <artifactId>dependency-check-maven</artifactId>
-         <version>3.0.1</version>
+         <version>3.2.1</version>
        </plugin>
        <plugin>
          <groupId>org.apache.maven.plugins</groupId>
@@ -535,7 +535,6 @@
           <groupId>net.logstash.log4j</groupId>
           <artifactId>jsonevent-layout</artifactId>
           <version>1.7</version>
-          <scope>runtime</scope>
         </dependency>
       </dependencies>
     </profile>
@@ -547,7 +546,7 @@
         <checksumPolicy>ignore</checksumPolicy>
       </snapshots>
       <id>georchestra</id>
-      <url>https://packages.georchestra.org/maven/repository</url>
+      <url>https://packages.georchestra.org/artifactory/maven</url>
     </repository>
     <!-- geotools -->
     <repository>

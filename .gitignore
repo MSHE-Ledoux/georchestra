@@ -17,3 +17,6 @@ PostTreatment.groovy
 ./geosync/georchestra-restreint/.geosync.conf
 ./geosync/georchestra-restreint/.pgpass
 *~
+**/.geosync.conf
+**/.pgpass
+
