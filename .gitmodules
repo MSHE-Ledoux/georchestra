@@ -25,3 +25,6 @@
 [submodule "geoserver/geoserver-submodule"]
 	path = geoserver/geoserver-submodule
 	url = https://github.com/georchestra/geoserver.git
+[submodule "docker/smtp"]
+	path = docker/smtp
+	url = git@github.com:georchestra/docker_smtp.git
