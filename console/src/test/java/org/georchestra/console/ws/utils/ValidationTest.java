@@ -31,6 +31,7 @@ public class ValidationTest {
         Set<String> requiredOrgFields = new HashSet<String>();
 
         requiredOrgFields.add("name");
+        requiredOrgFields.add("shortName");
 
         Assert.assertEquals(validation.getRequiredOrgFields(), requiredOrgFields);
 
@@ -106,18 +107,4 @@ public class ValidationTest {
         Assert.assertFalse(v.validateOrgField("required_org_field", (String) null));
 
     }
-
-    @Test
-    public void testJson() throws JSONException {
-        Validation v = new Validation("");
-
-        JSONObject json = new JSONObject("{'uid': 'josé', 'mail': 'josé@mail.com'}");
-
-        Assert.assertTrue(v.validateUserField("telephone", json));
-        Assert.assertTrue(v.validateUserField("uid", json));
-        Assert.assertTrue(v.validateUserField("mail", json));
-        Assert.assertFalse(v.validateUserField("password", json));
-
-    }
-
 }

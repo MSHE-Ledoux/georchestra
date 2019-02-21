@@ -6,16 +6,15 @@
         "projections": [{
             "srs": "EPSG:4326", 
             "name": "WGS 84",
-            "labels": ["Longitude", "Latitude"]
+            "decimalPrecision": 6
         }, {
             "srs": "EPSG:2154", 
-            "name": "Lambert 93",
-            "labels": ["X", "Y"]
+            "name": "Lambert 93"
         }]
     },
     "title": {
         "en": "Go to coordinates...",
-        "es": "Ir a coordenadas ...",
+        "es": "Ir a coordenadas...",
         "fr": "Aller aux coordonnées ...",
         "de": "Zu Koordinaten gehen"
     },

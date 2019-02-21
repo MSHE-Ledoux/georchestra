@@ -73,10 +73,6 @@ OpenLayers.Lang.ru = OpenLayers.Util.extend(OpenLayers.Lang.ru, {
     "Proportional symbols": "Пропорциональные символы",
     /* GEOR_FeatureDataModel.js strings */
     "objects": "объекты",
-    /* GEOR_address.js strings */
-    "Go to: ": "Перейти в...",
-    "searching...": "Идёт поиск...",
-    "adressSearchExemple": "пример поиска адреса : 4, Hugo, Brest",
     /* GEOR_ajaxglobal.js strings strings */
     "Server did not respond.": "Сервер не дал ответа",
     "Server access denied.": "Cервер отказался отвечать",
@@ -130,7 +126,7 @@ OpenLayers.Lang.ru = OpenLayers.Util.extend(OpenLayers.Lang.ru, {
     "Upload a vector data file.": "Загрузите файл с векторными данными.",
     "The allowed formats are the following: ": "Допустимы следующие форматы :",
     "Use ZIP compression for multifiles formats, such as": "Используйте ZIP сжатие для многофайловых форматов, таких как",
-    /* TODO "fileupload_error_incompleteMIF": "Incomplete MIF/MID file.",
+    /* TODO
     "fileupload_error_incompleteSHP": "Incomplete shapefile.",
     "fileupload_error_incompleteTAB": "Incomplete TAB file.",
     "fileupload_error_ioError": "Server-side I/O exception. Contact platform administrator for more details.",
@@ -140,6 +136,7 @@ OpenLayers.Lang.ru = OpenLayers.Util.extend(OpenLayers.Lang.ru, {
     "fileupload_error_unsupportedFormat": "This format is not supported.",*/
     // TODO "server upload error: ERROR": "Upload failed. ${ERROR}",
     /* GEOR_geonames.js strings */
+    "Go to: ": "Перейти в...",
     /* GEOR_getfeatureinfo.js strings */
     "<div>Searching...</div>": "<div>Идёт поиск...</div>",
     "<div>Search on objects active for NAME layer. Click on the map.</div>": "<div>Поиск объектов запущен на слое ${NAME}. Щёлкните мышкой на карте.</div>",
@@ -231,6 +228,10 @@ OpenLayers.Lang.ru = OpenLayers.Util.extend(OpenLayers.Lang.ru, {
     //"Error while loading file": "Erreur au chargement du fichier",
     /* GEOR_mappanel.js strings */
     "Coordinates in ": "Координаты в ",
+    "coordinates.short.x": "X",
+    "coordinates.short.y": "Y",
+    "coordinates.short.longitude": "Дол",
+    "coordinates.short.latitude": "Шир",
     "scale picker": "масштаб",
     /* GEOR_ows.js strings */
     "The NAME layer was not found in WMS service.": "Слой ${NAME} не был найден в сервисе WMS (Web Map Service : Cервис Веб-Карт).",
@@ -362,7 +363,7 @@ OpenLayers.Lang.ru = OpenLayers.Util.extend(OpenLayers.Lang.ru, {
     "Available tools:": "Инструменты в распоряжении",
     "Click to select or deselect the tool": "Щёлкните для того, чтобы выбрать инструмент или отменить его",
     "Could not load addon ADDONNAME": "Невозможно загрузить аддон ${ADDONNAME}",
-    //"Your new tools are now available in the tools menu.": 'Vos nouveaux outils sont disponibles dans le menu "outils"',
+    //"New tools are now available": "De nouveaux outils sont disponibles",
     /* GEOR_util.js strings */
     "Characters": "Письменность",
     "Digital": "Цифровой",
@@ -443,7 +444,7 @@ OpenLayers.Lang.ru = OpenLayers.Util.extend(OpenLayers.Lang.ru, {
     // no trailing comma
 });
 
-GeoExt.Lang.add("fr", {
+GeoExt.Lang.add("ru", {
     "GeoExt.ux.FeatureEditorGrid.prototype": {
         deleteMsgTitle: "Delete Feature?",
         deleteMsg: "Are you sure you want to delete this feature?",

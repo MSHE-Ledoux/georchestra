@@ -47,12 +47,14 @@ public abstract class AbstractEmailFactory {
 	protected String from;
 	protected String bodyEncoding;
 	protected String subjectEncoding;
-	protected String[] languages;
 	protected ExpiredArchiveDaemon expireDeamon;
 	protected String  emailAckTemplateFile;
 	protected String  emailTemplateFile;
 	protected String  extraKeywordsFile;
 	protected String  emailSubject;
+	protected String  language;
+	protected String  publicUrl;
+	protected String  instanceName;
 
     private boolean frozen = false;
 
@@ -64,14 +66,7 @@ public abstract class AbstractEmailFactory {
     public void init() {
         if ((georConfig != null) && (georConfig.activated())) {
             LOG.info("geOrchestra datadir: reconfiguring bean " + this.getClass());
-            smtpHost = georConfig.getProperty("smtpHost");
-            smtpPort = Integer.parseInt(georConfig.getProperty("smtpPort"));
-            emailHtml = georConfig.getProperty("emailHtml");
-            replyTo = georConfig.getProperty("replyTo");
-            from = georConfig.getProperty("from");
-            languages = georConfig.getProperty("language").split(",");
-            extraKeywordsFile = String.format("i18n/extra_keywords_%s", georConfig.getProperty("language"));
-            emailSubject = georConfig.getProperty("emailsubject");
+            extraKeywordsFile = String.format("i18n/extra_keywords_%s", language);
             emailAckTemplateFile = String.format("%s/templates/extractor-email-ack-template.tpl", georConfig.getContextDataDir());
             emailTemplateFile = String.format("%s/templates/extractor-email-template.tpl", georConfig.getContextDataDir());
             LOG.info("geOrchestra datadir: done.");
@@ -230,13 +225,6 @@ public abstract class AbstractEmailFactory {
         checkState();
         this.subjectEncoding = subjectEncoding;
     }
-    public String[] getLanguages() {
-        return languages;
-    }
-    public void setLanguages(String[] languages) {
-        checkState();
-        this.languages = languages;
-    }
     public ExpiredArchiveDaemon getExpireDeamon() {
     	return this.expireDeamon;
     }
@@ -258,5 +246,17 @@ public abstract class AbstractEmailFactory {
 
 	public void setEmailSubject(String emailSubject) {
 		this.emailSubject = emailSubject;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public void setPublicUrl(String publicUrl) {
+		this.publicUrl = publicUrl;
+	}
+
+	public void setInstanceName(String instanceName) {
+		this.instanceName = instanceName;
 	}
 }

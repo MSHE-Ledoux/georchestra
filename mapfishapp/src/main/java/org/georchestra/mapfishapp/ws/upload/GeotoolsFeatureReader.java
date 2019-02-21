@@ -19,13 +19,7 @@
 
 package org.georchestra.mapfishapp.ws.upload;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.HashMap;
-
+import com.vividsolutions.jts.geom.Geometry;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +28,6 @@ import org.geotools.data.DataStore;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.Query;
 import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.data.mif.MIFDataStoreFactory;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
@@ -44,13 +37,19 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.geotools.xml.Configuration;
 import org.geotools.xml.PullParser;
+import org.json.JSONArray;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
-import com.vividsolutions.jts.geom.Geometry;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * This class is a façade to the Geotools data management implementations.
@@ -59,17 +58,27 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Mauricio Pazos
  *
  */
-class GeotoolsFeatureReader implements FeatureGeoFileReader {
+public class GeotoolsFeatureReader implements FeatureGeoFileReader {
 
     private static final Log   LOG     = LogFactory.getLog(GeotoolsFeatureReader.class.getPackage().getName());
 
     private final FileFormat[] formats = new FileFormat[] {
                                                         FileFormat.shp,
-                                                        FileFormat.mif,
                                                         FileFormat.gml,
                                                         FileFormat.kml };
 
     public GeotoolsFeatureReader() {}
+
+    @Override
+    public JSONArray getFormatListAsJSON() {
+        JSONArray ret = new JSONArray();
+
+        FileFormat[] ff = getFormatList();
+        for (FileFormat f: ff) {
+            ret.put(f.toString());
+        }
+        return ret;
+    }
 
     @Override
     public FileFormat[] getFormatList() {
@@ -96,8 +105,6 @@ class GeotoolsFeatureReader implements FeatureGeoFileReader {
         switch (fileFormat) {
         case shp:
             return readShpFile(file, targetCRS);
-        case mif:
-            return readMifFile(file, targetCRS);
         case gml:
             return readGmlFile(file, targetCRS);
         case kml:
@@ -261,30 +268,6 @@ class GeotoolsFeatureReader implements FeatureGeoFileReader {
     }
 
     /**
-     * Reads the features from MIF file.
-     *
-     * @param file
-     * @return {@link SimpleFeatureCollection}
-     *
-     * @throws IOException
-     */
-    private SimpleFeatureCollection readMifFile(final File file,
-            final CoordinateReferenceSystem crs) throws IOException {
-
-        MIFDataStoreFactory storeFactory = new MIFDataStoreFactory();
-
-        HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-        params.put(MIFDataStoreFactory.PARAM_PATH.key, file.getAbsolutePath());
-        DataStore store = storeFactory.createDataStore(params);
-
-        String typeName = FilenameUtils.getBaseName(file.getAbsolutePath());
-
-        SimpleFeatureCollection features = retrieveFeatures(typeName, store, crs);
-
-        return features;
-    }
-
-    /**
      * Reads the features from Shape file.
      *
      * @param file
@@ -296,8 +279,7 @@ class GeotoolsFeatureReader implements FeatureGeoFileReader {
 
         ShapefileDataStoreFactory storeFactory = new ShapefileDataStoreFactory();
 
-        FileDataStore store = storeFactory
-                .createDataStore(file.toURI().toURL());
+        FileDataStore store = storeFactory.createDataStore(file.toURL());
 
         String typeName = FilenameUtils.getBaseName(file.getAbsolutePath());
 
@@ -349,11 +331,4 @@ class GeotoolsFeatureReader implements FeatureGeoFileReader {
         }
         return false;
     }
-
-	@Override
-	public boolean allowsGeoToolsFallback() {
-		// GeoTools cannot fallback onto itself
-		return false;
-	}
-
 }

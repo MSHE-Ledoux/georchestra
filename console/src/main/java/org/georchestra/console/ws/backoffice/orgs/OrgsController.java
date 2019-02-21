@@ -19,7 +19,7 @@
 
 package org.georchestra.console.ws.backoffice.orgs;
 
-import org.georchestra.commons.configuration.GeorchestraConfiguration;
+import org.apache.commons.lang3.ArrayUtils;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.DelegationDao;
 import org.georchestra.console.ds.OrgsDao;
@@ -33,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,7 +52,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Controller
 public class OrgsController {
@@ -67,16 +74,56 @@ public class OrgsController {
     private OrgsDao orgDao;
 
     @Autowired
-    private Validation validation;
+    protected Validation validation;
 
     @Autowired
-    private GeorchestraConfiguration georConfig;
+    protected DelegationDao delegationDao;
 
     @Autowired
-    private DelegationDao delegationDao;
+    protected AdvancedDelegationDao advancedDelegationDao;
 
-    @Autowired
-    private AdvancedDelegationDao advancedDelegationDao;
+    /**
+     * Areas map configuration
+     *
+     * This map appears on the /console/account/new page, when the user checks
+     * the "my org does not exist" checkbox.
+     * Currently the map is configured with the EPSG:4326 SRS.
+     */
+
+    /* Center of map */
+    @Value("${AreaMapCenter:1.77, 47.3}")
+    private String areaMapCenter;
+
+    /* Zoom of map */
+    @Value("${AreaMapZoom:6}")
+    private String areaMapZoom;
+
+    /* URL of a static file or a service with a GeoJSON FeatureCollection
+     * object string in EPSG:4326.
+     *
+     * Example of a "dynamic" areasUrl:
+     *   https://my.server.org/geoserver/ows?SERVICE=WFS&REQUEST=GetFeature&typeName=gadm:gadm_for_countries&outputFormat=json&cql_filter=ISO='FRA' or ISO='BEL'
+     */
+    @Value("${AreasUrl:https://www.geopicardie.fr/public/communes_simplified.json}")
+    private String areasUrl;
+
+    /* The following properties are used to configure the map widget behavior */
+
+    /* Key stored in the org LDAP record to uniquely identify a feature. */
+    @Value("${AreasKey:INSEE_COM}")
+    private String areasKey;
+
+    /* Feature "nice name" which appears in the widget list once selected. */
+    @Value("${AreasValue:NOM_COM}")
+    private String areasValue;
+
+    /* Feature property which is used to group together areas.
+     *
+     * eg: if the GeoJSON file represents regions, then AreasGroup might be the
+     * property with the "state name".
+     */
+    @Value("${AreasGroup:NOM_DEP}")
+    private String areasGroup;
 
     @Autowired
     public OrgsController(OrgsDao dao) {
@@ -162,7 +209,7 @@ public class OrgsController {
             produces="application/json; charset=utf-8")
     @ResponseBody
     public Org updateOrgInfos(@PathVariable String commonName, HttpServletRequest request)
-            throws IOException, JSONException {
+            throws IOException, JSONException, SQLException {
 
         this.checkOrgAuthorization(commonName);
 
@@ -179,10 +226,22 @@ public class OrgsController {
 
         // Update org and orgExt fields
         this.updateFromRequest(org, json);
+        orgExt.setId(org.getId());
         this.updateFromRequest(orgExt, json);
 
         // Persist changes to LDAP server
         this.orgDao.update(org);
+
+        if (!commonName.equals(org.getId())) {
+            for (DelegationEntry delegation : this.advancedDelegationDao.findByOrg(commonName)) {
+                delegation.removeOrg(commonName);
+                delegation.setOrgs(ArrayUtils.add(delegation.getOrgs(), org.getId()));
+                this.delegationDao.save(delegation);
+            }
+        }
+
+
+
         this.orgDao.update(orgExt);
 
         org.setOrgExt(orgExt);
@@ -192,15 +251,15 @@ public class OrgsController {
     /**
      * Create a new org based on JSON document sent by browser. JSON document may contain following keys :
      *
-     * * 'name' (mandatory)
-     * * 'shortName'
+     * * 'name'
+     * * 'shortName' (mandatory)
      * * 'cities' as json array ex: [654,865498,98364,9834534,984984,6978984,98498]
      * * 'status'
      * * 'type'
      * * 'address'
      * * 'members' as json array ex: ["testadmin", "testuser"]
      *
-     * All fields are optional except 'name' which is used to generate organization identifier.
+     * All fields are optional except 'shortName' which is used to generate organization identifier.
      *
      * A new JSON document will be return to browser with a complete description of created org. @see updateOrgInfos()
      * for JSON format.
@@ -213,26 +272,17 @@ public class OrgsController {
         JSONObject json = this.parseRequest(request);
 
         // Validate request against required fields for admin part
-        if (!this.validation.validateOrgField("name", json))
-            throw new IOException("required field : name");
+        if (!this.validation.validateOrgField("shortName", json))
+            throw new IOException("required field : shortName");
 
         Org org = new Org();
-        OrgExt orgExt = new OrgExt();
-
-        // Generate string identifier based on name
-        String id = this.orgDao.generateId(json.getString(Org.JSON_NAME));
-        org.setId(id);
-        orgExt.setId(id);
-
-        // Generate unique numeric identifier
-        orgExt.setNumericId(this.orgDao.generateNumericId());
-
-        // Update org and orgExt fields
+        org.setId("");
         this.updateFromRequest(org, json);
-        this.updateFromRequest(orgExt, json);
 
-        // Validate org
-        org.setStatus(Org.STATUS_REGISTERED);
+        OrgExt orgExt = new OrgExt();
+        orgExt.setNumericId(this.orgDao.generateNumericId());
+        orgExt.setId(org.getId());
+        this.updateFromRequest(orgExt, json);
 
         // Persist changes to LDAP server
         this.orgDao.insert(org);
@@ -275,6 +325,7 @@ public class OrgsController {
     public void getUserRequiredFields(HttpServletResponse response) throws IOException, JSONException {
             JSONArray fields = new JSONArray();
             fields.put("name");
+            fields.put("shortName");
             ResponseUtil.buildResponse(response, fields.toString(4), HttpServletResponse.SC_OK);
     }
 
@@ -317,19 +368,19 @@ public class OrgsController {
         JSONObject map = new JSONObject();
         // Parse center
         try {
-            String[] rawCenter = this.georConfig.getProperty("AreaMapCenter").split("\\s*,\\s*");
+            String[] rawCenter = areaMapCenter.split("\\s*,\\s*");
             JSONArray center = new JSONArray();
             center.put(Double.parseDouble(rawCenter[0]));
             center.put(Double.parseDouble(rawCenter[1]));
             map.put("center", center);
-            map.put("zoom", this.georConfig.getProperty("AreaMapZoom"));
+            map.put("zoom", areaMapZoom);
             res.put("map", map);
         } catch (Exception e){}
         JSONObject areas = new JSONObject();
-        areas.put("url", this.georConfig.getProperty("AreasUrl"));
-        areas.put("key", this.georConfig.getProperty("AreasKey"));
-        areas.put("value", this.georConfig.getProperty("AreasValue"));
-        areas.put("group", this.georConfig.getProperty("AreasGroup"));
+        areas.put("url", areasUrl);
+        areas.put("key", areasKey);
+        areas.put("value", areasValue);
+        areas.put("group", areasGroup);
         res.put("areas", areas);
         ResponseUtil.buildResponse(response, res.toString(4), HttpServletResponse.SC_OK);
     }
@@ -416,37 +467,23 @@ public class OrgsController {
      * @param json Json document to take information from
      * @throws JSONException If something went wrong during information extraction from json document
      */
-    private void updateFromRequest(Org org, JSONObject json){
-
-        try{
-            org.setName(json.getString(Org.JSON_NAME));
-        } catch (JSONException ex){}
-
-        try{
-            org.setShortName(json.getString(Org.JSON_SHORT_NAME));
-        } catch (JSONException ex){}
-
-        try{
-            JSONArray cities = json.getJSONArray(Org.JSON_CITIES);
-            List<String> parsedCities = new LinkedList<String>();
-            for(int i = 0; i < cities.length(); i++)
-                parsedCities.add(cities.getString(i));
-            org.setCities(parsedCities);
-        } catch (JSONException ex){}
-
-        try{
-            JSONArray members = json.getJSONArray(Org.JSON_MEMBERS);
-            List<String> parsedMembers = new LinkedList<String>();
-            for(int i = 0; i < members.length(); i++)
-                parsedMembers.add(members.getString(i));
-            org.setMembers(parsedMembers);
-        } catch (JSONException ex){}
-
-
-        try{
-            org.setStatus(json.getString(Org.JSON_STATUS));
-        } catch (JSONException ex){}
-
+    protected void updateFromRequest(Org org, JSONObject json) throws IOException {
+        org.setId(orgDao.reGenerateId(json.optString(Org.JSON_SHORT_NAME), org.getId()));
+        org.setName(json.optString(Org.JSON_NAME));
+        org.setShortName(json.optString(Org.JSON_SHORT_NAME));
+        if (!json.isNull(Org.JSON_CITIES)) {
+            org.setCities(StreamSupport
+                .stream(json.optJSONArray(Org.JSON_CITIES).spliterator(), false)
+                .map(Object::toString)
+                .collect(Collectors.toList()));
+        }
+        if (!json.isNull(Org.JSON_MEMBERS)) {
+            org.setMembers(StreamSupport
+                .stream(json.optJSONArray(Org.JSON_MEMBERS).spliterator(), false)
+                .map(Object::toString)
+                .collect(Collectors.toList()));
+        }
+        org.setPending(json.optBoolean(Org.JSON_PENDING));
     }
 
     /**
@@ -458,16 +495,10 @@ public class OrgsController {
      * @param json Json document to take information from
      * @throws JSONException If something went wrong during information extraction from json document
      */
-    private void updateFromRequest(OrgExt orgExt, JSONObject json){
-
-        try{
-            orgExt.setOrgType(json.getString(OrgExt.JSON_ORG_TYPE));
-        } catch (JSONException ex){}
-
-        try{
-            orgExt.setAddress(json.getString(OrgExt.JSON_ADDRESS));
-        } catch (JSONException ex){}
-
+    private void updateFromRequest(OrgExt orgExt, JSONObject json) {
+        orgExt.setOrgType(json.optString(OrgExt.JSON_ORG_TYPE));
+        orgExt.setAddress(json.optString(OrgExt.JSON_ADDRESS));
+        orgExt.setPending(json.optBoolean(Org.JSON_PENDING));
     }
 
     /**
@@ -479,13 +510,5 @@ public class OrgsController {
      */
     private JSONObject parseRequest(HttpServletRequest request) throws IOException, JSONException {
         return new JSONObject(FileUtils.asString(request.getInputStream()));
-    }
-
-    public GeorchestraConfiguration getGeorConfig() {
-        return georConfig;
-    }
-
-    public void setGeorConfig(GeorchestraConfiguration georConfig) {
-        this.georConfig = georConfig;
     }
 }

@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * Possible values:
  * *
  *
- * There is hardcoded mandatory field for user and organizations creation:
+ * There are hardcoded mandatory fields for user and organizations creation:
  *
  * mandatory user fields:
  * * email
@@ -71,6 +71,7 @@ public class Validation {
 
 		// Add mandatory field for org
 		this.requiredOrgFields.add("name");
+		this.requiredOrgFields.add("shortName");
 
 		// Extract all fields starting by Org and change next letter to lower case
 		// orgShortName --> shortName
@@ -131,16 +132,16 @@ public class Validation {
 			errors.rejectValue(field, "error.required", "required");
 	}
 
-	public boolean validateUserField(String field, String value){
-		return !this.isUserFieldRequired(field) || StringUtils.hasLength(value);
-	}
-
-	public boolean validateUserField(String field, JSONObject json){
-		try {
-			return !this.isUserFieldRequired(field) || (json.has(field) && StringUtils.hasLength(json.getString(field)));
-		} catch (JSONException e) {
+	public boolean validateUserFieldWithSpecificMsg (String field, String value, Errors errors) {
+		if(!validateUserField(field, value)) {
+			errors.rejectValue(field, String.format("%s.error.required", field), "required");
 			return false;
 		}
+		return true;
+	}
+
+	protected boolean validateUserField(String field, String value){
+		return !this.isUserFieldRequired(field) || StringUtils.hasLength(value);
 	}
 
 	public boolean validateOrgField(String field, JSONObject json){
@@ -152,8 +153,9 @@ public class Validation {
 	}
 
 	public void validateOrgField (String field, String value, Errors errors) {
-		if(!validateOrgField(field, value))
-			errors.rejectValue(field, "error.required", "required");
+		if(!validateOrgField(field, value)) {
+			errors.rejectValue(String.format("org%s", StringUtils.capitalize(field)), "error.required", "required");
+		}
 	}
 
 	public boolean validateOrgField(String field, String value){

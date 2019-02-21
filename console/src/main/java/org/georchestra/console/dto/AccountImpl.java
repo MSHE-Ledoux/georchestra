@@ -132,6 +132,7 @@ public class AccountImpl implements Serializable, Account{
 	// Organization from ou=orgs,dc=georchestra,dc=org
 	// Json export is defined on the getter getOrg()
 	private String org;
+	private boolean pending;
 
 	@Override
 	public String toString() {
@@ -642,7 +643,17 @@ public class AccountImpl implements Serializable, Account{
 	}
 
     public int compareTo(Account o) {
-		String fullName = this.getSurname() + " " + this.getGivenName();
-		return fullName.compareToIgnoreCase(o.getSurname() + " " + o.getGivenName());
+		return o.getUid().compareToIgnoreCase(this.uid);
     }
+
+	@Override
+	public boolean isPending() {
+		return pending;
+	}
+
+	@Override
+	public void setPending(boolean pending) {
+		this.pending = pending;
+
+	}
 }

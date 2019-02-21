@@ -2,7 +2,7 @@ FROM jetty:9-jre8
 
 ENV XMS=256M XMX=512M
 
-RUN java -jar "$JETTY_HOME/start.jar" --create-startd --add-to-start=jmx,jmx-remote,stats
+RUN java -jar "$JETTY_HOME/start.jar" --create-startd --add-to-start=jmx,jmx-remote,stats,http-forwarded
 
 ADD . /
 
@@ -22,4 +22,6 @@ CMD ["sh", "-c", "exec java \
 -Xms$XMS -Xmx$XMX \
 -XX:-UsePerfData \
 ${JAVA_OPTIONS} \
+-Djetty.jmxremote.rmiregistryhost=0.0.0.0 \
+-Djetty.jmxremote.rmiserverhost=0.0.0.0 \
 -jar /usr/local/jetty/start.jar"]

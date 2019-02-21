@@ -77,10 +77,6 @@ OpenLayers.Lang.fr = OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     "Proportional symbols": "Symboles proportionnels",
     /* GEOR_FeatureDataModel.js strings */
     "objects": "objets",
-    /* GEOR_address.js strings */
-    "Go to: ": "Aller à : ",
-    "searching...": "recherche en cours...",
-    "adressSearchExemple": "ex: 4, Hugo, Brest",
     /* GEOR_ajaxglobal.js strings strings */
     "Server did not respond.": "Le serveur n'a pas répondu.",
     "Server access denied.": "Le serveur a refusé de répondre.",
@@ -149,7 +145,6 @@ OpenLayers.Lang.fr = OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     "Upload a vector data file.": "Uploadez un fichier de données vectorielles.",
     "The allowed formats are the following: ": "Les formats acceptés sont les suivants : ",
     "Use ZIP compression for multifiles formats, such as": "Utilisez la compression ZIP pour les formats multi-fichiers comme",
-    "fileupload_error_incompleteMIF": "Fichier MIF/MID incomplet.",
     "fileupload_error_incompleteSHP": "Fichier shapefile incomplet.",
     "fileupload_error_incompleteTAB": "Fichier TAB incomplet.",
     "fileupload_error_ioError": "Erreur d'I/O sur le serveur. Contacter l'administrateur de la plateforme pour plus de détails.",
@@ -161,6 +156,7 @@ OpenLayers.Lang.fr = OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     "server upload error: ERROR":
         "L'upload du fichier a échoué. ${ERROR}",
     /* GEOR_geonames.js strings */
+    "Go to: ": "Aller à : ",
     /* GEOR_getfeatureinfo.js strings */
     "<div>Searching...</div>": "<div>Recherche en cours...</div>",
     "<div>No layer selected</div>": "<div>Aucune couche sélectionnée</div>",
@@ -281,6 +277,10 @@ OpenLayers.Lang.fr = OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     "Error while loading file": "Erreur au chargement du fichier",
     /* GEOR_mappanel.js strings */
     "Coordinates in ": "Coordonnées en ",
+    "coordinates.short.x": "X",
+    "coordinates.short.y": "Y",
+    "coordinates.short.longitude": "Lon",
+    "coordinates.short.latitude": "Lat",
     "scale picker": "échelle",
     /* GEOR_ows.js strings */
     "The NAME layer was not found in WMS service.":
@@ -446,7 +446,7 @@ OpenLayers.Lang.fr = OpenLayers.Util.extend(OpenLayers.Lang.fr, {
     "Available tools:": "Outils disponibles :",
     "Click to select or deselect the tool": "Cliquez pour (dé)sélectionner l'outil",
     "Could not load addon ADDONNAME": "Impossible de charger l'addon ${ADDONNAME}",
-    "Your new tools are now available in the tools menu.": 'Vos nouveaux outils sont disponibles dans le menu "outils"',
+    "New tools are now available": "De nouveaux outils sont disponibles",
     /* GEOR_util.js strings */
     "Characters": "Caractères",
     "Digital": "Numérique",

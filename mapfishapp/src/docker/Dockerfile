@@ -2,20 +2,12 @@ FROM jetty:9-jre8
 
 ENV XMS=1G XMX=2G
 
-RUN java -jar "$JETTY_HOME/start.jar" --create-startd --add-to-start=jmx,jmx-remote,stats
+RUN java -jar "$JETTY_HOME/start.jar" --create-startd --add-to-start=jmx,jmx-remote,stats,http-forwarded
 
 ADD . /
 
 # Temporary switch to root
 USER root
-
-RUN apt-get update && \
-   apt-get install -y libgdal-java gdal-bin && \
-   rm -rf /var/lib/apt/lists/*
-
-RUN unzip -d /var/lib/jetty/webapps/mapfishapp /var/lib/jetty/webapps/mapfishapp.war && \
-    ln -s /usr/share/java/gdal.jar /var/lib/jetty/webapps/mapfishapp/WEB-INF/lib/ && \
-    rm -f /var/lib/jetty/webapps/mapfishapp.war
 
 RUN mkdir /mnt/mapfishapp_uploads && \
     chown jetty:jetty /etc/georchestra /mnt/mapfishapp_uploads
@@ -33,4 +25,6 @@ CMD ["sh", "-c", "exec java \
 -Xms$XMS -Xmx$XMX \
 -XX:-UsePerfData \
 ${JAVA_OPTIONS} \
+-Djetty.jmxremote.rmiregistryhost=0.0.0.0 \
+-Djetty.jmxremote.rmiserverhost=0.0.0.0 \
 -jar /usr/local/jetty/start.jar"]

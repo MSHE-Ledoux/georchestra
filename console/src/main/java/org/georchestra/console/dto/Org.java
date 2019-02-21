@@ -23,22 +23,20 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.ldap.core.DirContextAdapter;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Org implements Comparable<Org> {
+public class Org implements Comparable<Org>, ReferenceAware {
 
     public static final String JSON_ID = "id";
     public static final String JSON_NAME = "name";
     public static final String JSON_SHORT_NAME = "shortName";
     public static final String JSON_CITIES = "cities";
-    public static final String JSON_STATUS = "status";
     public static final String JSON_MEMBERS = "members";
-
-    public static final String STATUS_REGISTERED = "REGISTERED";
-    public static final String STATUS_PENDING = "PENDING";
+    public static final String JSON_PENDING = "pending";
 
     private String id;
     private String name;
@@ -46,6 +44,10 @@ public class Org implements Comparable<Org> {
     private List<String> cities = new LinkedList<String>();
     private String status;
     private List<String> members = new LinkedList<String>();
+    private boolean isPending;
+
+    @JsonIgnore
+    private DirContextAdapter reference;
 
     @JsonIgnore
     private OrgExt orgExt;
@@ -85,15 +87,6 @@ public class Org implements Comparable<Org> {
 
     public void setCities(List<String> cities) {
         this.cities = cities;
-    }
-
-    @JsonProperty(JSON_STATUS)
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     @JsonProperty(JSON_MEMBERS)
@@ -137,4 +130,20 @@ public class Org implements Comparable<Org> {
         return this.getName().compareToIgnoreCase(org.getName());
     }
 
+    public DirContextAdapter getReference() {
+        return reference;
+    }
+
+    public void setReference(DirContextAdapter reference) {
+        this.reference = reference;
+    }
+
+    @JsonProperty(JSON_PENDING)
+    public boolean isPending() {
+        return isPending;
+    }
+
+    public void setPending(boolean pending) {
+        isPending = pending;
+    }
 }

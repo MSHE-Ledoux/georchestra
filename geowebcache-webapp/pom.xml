@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.georchestra</groupId>
     <artifactId>root</artifactId>
-    <version>18.12-SNAPSHOT</version>
+    <version>19.06-SNAPSHOT</version>
   </parent>
   <artifactId>geowebcache-webapp</artifactId>
   <packaging>war</packaging>
@@ -14,7 +14,8 @@
     <geowebcache.war.excludes/>
     <maven.test.skip>false</maven.test.skip>
     <geowebcache.version>1.8.1</geowebcache.version>
-    <packageDatadirScmVersion>master</packageDatadirScmVersion>
+    <packageDatadirScmVersion>18.12</packageDatadirScmVersion>
+    <server>generic</server>
   </properties>
   <dependencies>
     <dependency>
@@ -80,20 +81,6 @@
     </testResources>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.groovy.maven</groupId>
-        <artifactId>gmaven-plugin</artifactId>
-        <configuration>
-          <classpath>
-            <entry>
-              <groupId>org.georchestra</groupId>
-              <artifactId>config</artifactId>
-              <version>${project.version}</version>
-              <classifier>${server}</classifier>
-            </entry>
-          </classpath>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.4.1</version>
@@ -132,33 +119,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>2.2</version>
-        <configuration>
-          <warSourceDirectory>${gwc.unpack.dir}</warSourceDirectory>
-          <webXml>${basedir}/src/main/webapp/WEB-INF/web.xml</webXml>
-          <filter>${confdir}/${project.artifactId}/maven.filter</filter>
-          <webResources>
-            <resource>
-              <filtering>false</filtering>
-              <directory>src/main/webapp</directory>
-              <excludes>
-                <exclude>gwc.properties</exclude>
-              </excludes>
-            </resource>
-            <resource>
-              <filtering>false</filtering>
-              <directory>${confdir}/${project.artifactId}</directory>
-              <excludes>
-                <exclude>maven.filter</exclude>
-                <exclude>README</exclude>
-              </excludes>
-            </resource>
-          </webResources>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>7.5.0.v20110901</version>
@@ -184,14 +144,20 @@
             <!--</connector>-->
           </connectors>
           <webAppConfig>
-            <contextPath>/gwc</contextPath>
+            <contextPath>/geowebcache</contextPath>
             <descriptor>${basedir}/src/main/webapp/WEB-INF/web.xml</descriptor>
             <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-              <resourcesAsCSV>${basedir}/src/main/webapp,${confdir}/${project.artifactId},${gwc.unpack.dir}</resourcesAsCSV>
+              <resourcesAsCSV>${basedir}/src/main/webapp,${gwc.unpack.dir}</resourcesAsCSV>
             </baseResource>
           </webAppConfig>
           <stopKey>GWC_JETTY_STOP</stopKey>
           <stopPort>8090</stopPort>
+          <systemProperties>
+            <systemProperty>
+              <name>georchestra.datadir</name>
+              <value>/etc/georchestra</value>
+            </systemProperty>
+          </systemProperties>
         </configuration>
       </plugin>
     </plugins>

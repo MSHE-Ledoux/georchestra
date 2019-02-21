@@ -1,12 +1,12 @@
 <div class="area clearfix">
 
-  <div class="col-md-8">
+  <div class="col-md-{{ area.maponly ? '12' : '8' }}">
     <div class="map">
       <div class="attributions">
         © <a href="http://openstreetmap.org" rel="noopener noreferrer" target="blank_">Openstreetmap</a>
         contributors.
       </div>
-      <div class="btn-group selection">
+      <div class="btn-group selection" ng-if="!area.maponly">
         <select ng-change="area.selectBy()" ng-model="area.group" class="btn btn-default btn-sm">
           <option value="" selected disabled class="glyphicon glyphicon-ok-circle" translate>
             area.selection
@@ -21,7 +21,7 @@
         </button>
       </div>
 
-      <div class="search-container" ng-init="search=''">
+      <div class="search-container" ng-init="search=''" ng-if="!area.maponly">
         <button class="btn btn-link btn-sm search-clear" ng-click="search = ''" ng-show="search != ''">
           <i class="glyphicon glyphicon-remove-sign"></i>
         </button>
@@ -30,7 +30,8 @@
     </div>
   </div>
 
-  <div class="col-md-4">
+  <div class="col-md-4" ng-if="!area.maponly">
+
     <p class="alert alert-info">
       {{area.collection.getArray().length}} {{ 'area.area' | translate }}
       <button ng-if="area.item.$resolved" class="btn btn-default btn-sm" ng-click="area.save()" translate>area.save</button>
@@ -38,11 +39,20 @@
     </p>
     
     <ul class="list">
-      <li dir-paginate="f in area.collection.getArray() | itemsPerPage: 25">
+      <li dir-paginate="f in area.collection.getArray() | itemsPerPage: 20">
+        <a class="text-danger pull-right" href="javascript:void(0)" ng-click="area.removeFromSelection(f)">
+          <i class="glyphicon glyphicon-remove"></i>
+        </a>
         {{f.get('_label')}}
       </li>
     </ul>
     <dir-pagination-controls max-size="7"></dir-pagination-controls>
+
+    <div class="btn-group importexport" ng-if="area.canExport">
+      <button class="btn btn-default btn-sm" ng-click="area.import()" translate>area.import</button>
+      <button class="btn btn-default btn-sm" ng-click="area.export()" translate>area.export</button>
+    </div>
+
   </div>
 
   <div class="loading" ng-show="area.loading">

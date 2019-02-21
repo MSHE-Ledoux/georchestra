@@ -102,7 +102,7 @@ GEOR.config = (function() {
             "KML": "KML",
             "application/vnd.google-earth.kml xml": "KML",
             "application/vnd.google-earth.kml+xml": "KML",
-            "SHAPE-ZIP": "SHAPE-ZIP",
+            "SHAPE-ZIP": "SHAPEFILE",
             "application/json": "JSON",
             "json": "JSON",
             "csv": "CSV"
@@ -300,23 +300,6 @@ GEOR.config = (function() {
          */
         MAP_DOTS_PER_INCH: getCustomParameter("MAP_DOTS_PER_INCH",
             1000 / 39.37 / 0.28),
-
-        /**
-         * Constant: RECENTER_ON_ADDRESSES
-         * {Boolean} whether to display the recenter on addresses tab.
-         * Defaults to false
-         */
-        RECENTER_ON_ADDRESSES: getCustomParameter("RECENTER_ON_ADDRESSES",
-            false),
-
-        /**
-         * Constant: ADDRESS_URL
-         * {String} The URL to the OpenAddresses web service.
-         * Required if and only if RECENTER_ON_ADDRESSES is set to true.
-         * Defaults to "/addrapp/addresses"
-         */
-        ADDRESS_URL: getCustomParameter("ADDRESS_URL",
-            "/addrapp/addresses"),
 
         /**
          * Constant: DEACCENTUATE_REFERENTIALS_QUERYSTRING
@@ -604,10 +587,10 @@ GEOR.config = (function() {
         /**
          * Constant: HELP_URL
          * {String} URL of the help ressource.
-         * Defaults to "http://cms.geobretagne.fr/assistance"
+         * Defaults to "http://cms.geobretagne.fr/etiquettes/tutoriels"
          */
         HELP_URL: getCustomParameter("HELP_URL",
-            "http://cms.geobretagne.fr/assistance"),
+            "http://cms.geobretagne.fr/etiquettes/tutoriels"),
 
         /**
          * Constant: CONTEXT_LOADED_INDICATOR_DURATION

@@ -42,12 +42,15 @@
 <body>
     <%@ include file="header.jsp" %>
 
+
+    <script>var org= ${org};</script>
+
 	<div class="container">
 		<div class="page-header">
 			<h1><s:message code="editUserDetailsForm.title"/> <small><s:message code="editUserDetailsForm.subtitle" /></small></h1>
 		</div>
 		<p class="lead"><s:message code="editUserDetailsForm.description" /></p>
-		<form:form id="form" name="form" method="post" action="userdetails" modelAttribute="editUserDetailsFormBean" cssClass="form-horizontal col-lg-6 col-lg-offset-1" onsubmit="return validate();">
+    <form:form id="form" name="form" method="post" action="userdetails" modelAttribute="editUserDetailsFormBean" cssClass="form-horizontal col-lg-6" onsubmit="return validate();">
 
 			<c:if test="${not empty success}">
 			<div id="message" class="alert alert-dismissable alert-success">
@@ -143,8 +146,50 @@
 						<button type="submit" class="btn btn-primary btn-lg"><s:message code="submit.label"/> </button>
 					</div>
 				</div>
-			</div>
+			</fieldset>
 		</form:form>
+
+    <!-- angularjs app dependencies -->
+    <link rel="stylesheet" href="/console/manager/public/libraries.css">
+    <link rel="stylesheet" href="/console/manager/public/app.css">
+    <style>
+      .area {
+        margin: 2em;
+        background: white;
+      }
+      .area .map {
+        height: 200px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .area .map canvas {
+        border-radius: 3px;
+      }
+    </style>
+    <script src="/console/manager/public/libraries.js"></script>
+    <script src="/console/manager/public/templates.js"></script>
+    <script src="/console/manager/public/app.js"></script>
+    <script>require('app')</script>
+    <!-- /angularjs app dependencies -->
+
+    <div class="col-lg-5 col-lg-offset-1" ng-app="manager" ng-strict-di ng-controller="StandaloneController">
+      <fieldset>
+        <legend><s:message code="editUserDetailsForm.organisation" /> «{{org.name}}»</legend>
+
+        <h4><s:message code="editUserDetailsForm.areaOfCompetence" /></h4>
+        <areas item="org" readonly="'true'"></areas>
+        <br>
+
+        <h4><s:message code="editUserDetailsForm.members" /></h4>
+        <ul>
+        <li dir-paginate="user in users | itemsPerPage: 10">
+          {{::user.sn}} {{::user.givenName}}
+        </li>
+        </ul>
+
+        <dir-pagination-controls></dir-pagination-controls>
+      </fieldset>
+    </div>
 	</div>
 	<script src="//code.jquery.com/jquery.js"></script>
 	<script src='js/bootstrap.min.js'></script>

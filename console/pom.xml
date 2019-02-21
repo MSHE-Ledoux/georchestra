@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.georchestra</groupId>
     <artifactId>root</artifactId>
-    <version>18.12-SNAPSHOT</version>
+    <version>19.06-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>console</artifactId>
@@ -11,17 +12,11 @@
   <name>Console</name>
   <url>http://www.georchestra.org</url>
   <properties>
-    <aspectj.version>1.7.0.RC1</aspectj.version>
-    <java.version>1.7</java.version>
+    <skipIT>true</skipIT> <!-- disable integration tests by default, use the "it" profile to run them which enables them-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <roo.version>1.1.5.RELEASE</roo.version>
-    <slf4j.version>1.6.4</slf4j.version>
-    <spring.version>4.2.3.RELEASE</spring.version>
-    <spring_ldap.version>2.0.4.RELEASE</spring_ldap.version>
-    <spring_security.version>4.0.3.RELEASE</spring_security.version>
-    <spring_data.version>1.11.1.RELEASE</spring_data.version>
-    <postgres.version>9.4-1205-jdbc41</postgres.version>
-    <packageDatadirScmVersion>master</packageDatadirScmVersion>
+    <packageDatadirScmVersion>18.12</packageDatadirScmVersion>
+    <server>generic</server>
   </properties>
   <repositories>
     <repository>
@@ -67,31 +62,26 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-core</artifactId>
-      <version>1.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-library</artifactId>
-      <version>1.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.9.5</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.tuckey</groupId>
       <artifactId>urlrewritefilter</artifactId>
-      <version>3.0.4</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -110,188 +100,163 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
-      <version>1.2</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>${log4j1.version}</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>apache-log4j-extras</artifactId>
-      <version>1.1</version>
       <type>jar</type>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjrt</artifactId>
-      <version>${aspectj.version}</version>
     </dependency>
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
-      <version>${aspectj.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>net.sf.flexjson</groupId>
       <artifactId>flexjson</artifactId>
-      <version>2.1</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20080701</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.1</version>
     </dependency>
     <dependency>
       <groupId>commons-validator</groupId>
       <artifactId>commons-validator</artifactId>
-      <version>1.6</version>
     </dependency>
     <!-- Spring dependencies -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>${spring.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.jayway.jsonpath</groupId>
+        <artifactId>json-path</artifactId>
+        <version>2.4.0</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-aop</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-aspects</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-orm</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>${spring.version}</version>
-      <classifier/>
     </dependency>
     <!-- Spring LDAP -->
     <dependency>
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-core</artifactId>
-      <version>${spring_ldap.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-core-tiger</artifactId>
-      <version>${spring_ldap.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-odm</artifactId>
-      <version>${spring_ldap.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-ldif-core</artifactId>
-      <version>${spring_ldap.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-ldif-batch</artifactId>
-      <version>${spring_ldap.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
-      <version>${spring_security.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-ldap</artifactId>
-      <version>${spring_security.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-config</artifactId>
-        <version>${spring_security.version}</version>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-web</artifactId>
-        <version>${spring_security.version}</version>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
-      <version>${spring_data.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-jpa</artifactId>
-      <version>1.9.1.RELEASE</version>
     </dependency>
     <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.9.5</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
 
     <!-- commons -->
     <dependency>
       <groupId>commons-digester</groupId>
       <artifactId>commons-digester</artifactId>
-      <version>2.1</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -302,82 +267,65 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.4</version>
     </dependency>
     <dependency>
       <groupId>javax.el</groupId>
       <artifactId>el-api</artifactId>
-      <version>1.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
-      <version>1.6</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet.jsp</groupId>
       <artifactId>jsp-api</artifactId>
-      <version>2.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
-      <version>1.4.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.tiles</groupId>
       <artifactId>tiles-jsp</artifactId>
-      <version>2.2.2</version>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>${postgres.version}</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator-annotation-processor</artifactId>
-      <version>4.1.0.Final</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>5.0.3.Final</version>
     </dependency>
     <dependency>
       <groupId>com.mchange</groupId>
       <artifactId>c3p0</artifactId>
-      <version>0.9.5.2</version>
     </dependency>
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
-      <version>1.0.0.GA</version>
-      <classifier/>
+      <classifier />
     </dependency>
     <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-nodep</artifactId>
-      <version>2.2</version>
-      <classifier/>
     </dependency>
     <dependency>
       <groupId>javax.transaction</groupId>
       <artifactId>jta</artifactId>
-      <version>1.1</version>
-      <classifier/>
     </dependency>
     <dependency>
       <groupId>com.googlecode.ez-vcard</groupId>
       <artifactId>ez-vcard</artifactId>
-      <version>0.9.7</version>
     </dependency>
     <!-- geOrchestra commons -->
     <dependency>
@@ -388,8 +336,6 @@
     <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
-      <version>1.5.4</version>
-      <classifier/>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -398,41 +344,35 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>commons-dbcp</groupId>
-      <artifactId>commons-dbcp</artifactId>
-      <version>1.4</version>
-      <classifier/>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-pool</groupId>
-          <artifactId>commons-pool</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>xerces</groupId>
-          <artifactId>xerces</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>xerces</groupId>
-          <artifactId>xercesImpl</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>xml-apis</groupId>
-          <artifactId>xml-apis</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
     <finalName>${project.artifactId}-${server}</finalName>
+    <testResources>
+      <testResource>
+        <directory>${project.basedir}/src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>${project.basedir}/src/it/resources</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <filesets>
             <fileset>
@@ -444,25 +384,13 @@
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.6</version>
         <configuration>
           <packagingExcludes>manager/node_modules/**</packagingExcludes>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
         <configuration>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
@@ -470,7 +398,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.18.1</version>
         <configuration>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <excludes>
@@ -481,7 +408,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.3</version>
         <configuration>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -491,13 +417,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.7</version>
       </plugin>
       <!-- IDE -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-eclipse-plugin</artifactId>
-        <version>2.7</version>
         <!-- Note 2.8 does not work with AspectJ aspect path -->
         <configuration>
           <downloadSources>true</downloadSources>
@@ -524,7 +448,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-idea-plugin</artifactId>
-        <version>2.2</version>
         <configuration>
           <downloadSources>true</downloadSources>
           <dependenciesAsLibraries>true</dependenciesAsLibraries>
@@ -540,7 +463,9 @@
         <artifactId>jetty-maven-plugin</artifactId>
         <version>9.2.11.v20150529</version>
         <configuration>
-          <webApp><contextPath>/console</contextPath></webApp>
+          <webApp>
+            <contextPath>/console</contextPath>
+          </webApp>
           <scanIntervalSeconds>5</scanIntervalSeconds>
           <scanTargets>
             <scanTarget>src/main/java/</scanTarget>
@@ -550,11 +475,16 @@
           <httpConnector>
             <port>8286</port>
           </httpConnector>
+          <systemProperties>
+            <systemProperty>
+              <name>georchestra.datadir</name>
+              <value>/etc/georchestra</value>
+            </systemProperty>
+          </systemProperties>
         </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-site-plugin</artifactId>
-        <version>3.3</version>
         <executions>
           <execution>
             <id>attach-descriptor</id>
@@ -640,7 +570,7 @@
                         <exclude name="${project.artifactId}/**" />
                       </fileset>
                     </delete>
-                 </target>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>
@@ -653,15 +583,17 @@
                   <target>
                     <chmod perm="ugo+x">
                       <fileset dir="${project.build.directory}/deb">
-                        <include name="**/bin/**"/>
-                        <include name="**/sbin/**"/>
-                        <include name="DEBIAN/post*"/>
-                        <include name="DEBIAN/pre*"/>
+                        <include name="**/bin/**" />
+                        <include name="**/sbin/**" />
+                        <include name="DEBIAN/post*" />
+                        <include name="DEBIAN/pre*" />
                       </fileset>
                     </chmod>
                   </target>
                 </configuration>
-                <goals><goal>run</goal></goals>
+                <goals>
+                  <goal>run</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>
@@ -720,7 +652,7 @@
                         <exclude name="${project.artifactId}/**" />
                       </fileset>
                     </delete>
-                 </target>
+                  </target>
                 </configuration>
                 <id>remove-useless-directories</id>
                 <phase>package</phase>
@@ -837,6 +769,101 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>it</id> <!-- Profile to enable integration tests with on the fly docker containers -->
+      <properties>
+        <skipIT>false</skipIT> <!-- re-enable integration tests -->
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <environmentVariables>
+                <!-- expose these two environment variables for Spring to resolve the connection URLs to ldap and psql as the 
+                  mapped ports set up by docker-maven-plugin bellow -->
+                <psql_port>${database_container.port}</psql_port>
+                <ldap_port>${ldap_container.port}</ldap_port>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-containers</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>start</goal>
+                </goals>
+                <configuration>
+                  <images>
+                    <image>
+                      <name>georchestra/database</name>
+                      <alias>database</alias>
+                      <run>
+                        <ports> <!-- expose the mapped port as the database_container.port maven property -->
+                          <port>database_container.port:5432</port>
+                        </ports>
+                        <wait>
+                          <healthy>true</healthy>
+                          <log>(?s)database system is ready to accept connections</log>
+                          <time>20000</time>
+                        </wait>
+                      </run>
+                    </image>
+                    <image>
+                      <name>georchestra/ldap</name>
+                      <alias>ldap</alias>
+                      <run>
+                        <ports> <!-- expose the mapped port as the ldap_container.port maven property -->
+                          <port>ldap_container.port:389</port>
+                        </ports>
+                        <env>
+                          <SLAPD_ORGANISATION>georchestra</SLAPD_ORGANISATION>
+                          <SLAPD_DOMAIN>georchestra.org</SLAPD_DOMAIN>
+                          <SLAPD_PASSWORD>secret</SLAPD_PASSWORD>
+                          <SLAPD_ADDITIONAL_MODULES>groupofmembers</SLAPD_ADDITIONAL_MODULES>
+                        </env>
+                        <wait>
+                          <!-- Need to figure out a good way to make sure the ldap service is ready before the tests are run. 
+                            The healthy check seems to be good enough but the tests still can't connect -->
+                          <time>20000</time>
+                          <!-- <healthy>true</healthy> -->
+                          <tcp>
+                            <mode>mapped</mode>
+                            <ports>
+                              <port>389</port>
+                            </ports>
+                          </tcp>
+                        </wait>
+                      </run>
+                    </image>
+                  </images>
+                </configuration>
+              </execution>
+              <execution>
+                <id>remove-containers</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>stop</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
   <reporting>
     <plugins>
@@ -881,7 +908,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.17</version>
       </plugin>
     </plugins>
   </reporting>

@@ -19,14 +19,6 @@
 
 package org.georchestra.console.ws.backoffice.roles;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.dao.AdvancedDelegationDao;
@@ -58,7 +50,22 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Web Services to maintain the Roles information.
@@ -135,6 +142,7 @@ public class RolesController {
 	@ResponseBody
 	public List<Role> findAll() throws DataServiceException {
 		List<Role> list = this.roleDao.findAll();
+		list.stream().forEach(role -> {role.setUserList(filter.filterStringList(role.getUserList()));});
 		list.add(this.generateTemporaryRole());
 		return list;
 	}
@@ -218,6 +226,7 @@ public class RolesController {
 
 		try{
 			Role role = createRoleFromRequestBody(request.getInputStream());
+
 			this.roleDao.insert( role );
 			RoleResponse roleResponse = new RoleResponse(role, this.filter);
 			String jsonResponse = roleResponse.asJsonString();
@@ -399,6 +408,16 @@ public class RolesController {
 		List<String> putRole = createUserList(json, "PUT");
 		List<String> deleteRole = createUserList(json, "DELETE");
 
+		List<Account> accounts = users.stream()
+				.map(userUuid -> {
+			try {
+				return accountDao.findByUID(userUuid);
+			} catch (DataServiceException e) {
+				return null;
+			}})
+				.filter(account -> null != account)
+				.collect(Collectors.toList());
+
 		// Don't allow modification of ORGADMIN role
 		if(putRole.contains("ORGADMIN") || deleteRole.contains("ORGADMIN"))
 			throw new IllegalArgumentException("ORGADMIN role cannot be add or delete");
@@ -407,8 +426,8 @@ public class RolesController {
 		if(!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SUPERUSER")))
 			this.checkAuthorization(auth.getName(), users, putRole, deleteRole);
 
-		this.roleDao.addUsersInRoles(putRole, users, auth.getName());
-		this.roleDao.deleteUsersInRoles(deleteRole, users, auth.getName());
+		this.roleDao.addUsersInRoles(putRole, accounts, auth.getName());
+		this.roleDao.deleteUsersInRoles(deleteRole, accounts, auth.getName());
 
 		ResponseUtil.writeSuccess(response);
 	}
@@ -503,9 +522,9 @@ public class RolesController {
 			String description = RequestUtil.getFieldValue(json, RoleSchema.DESCRIPTION_KEY);
 			Boolean isFavorite = RequestUtil.getBooleanFieldValue(json, RoleSchema.FAVORITE_JSON_KEY);
 
-			Role g = RoleFactory.create(commonName, description, isFavorite);
+			Role role = RoleFactory.create(commonName, description, isFavorite);
 
-			return g;
+			return role;
 
 		} catch (IllegalArgumentException e) {
 			throw e;

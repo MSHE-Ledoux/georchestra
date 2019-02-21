@@ -126,8 +126,10 @@ public class UpLoadFileManagementGTImplTest {
 		JSONArray jsonArray = list.getJSONArray("features");
 		JSONObject reg = jsonArray.getJSONObject(0);
 
+		assertNotNull(getJsonFieldValue(reg, "id"));
+		assertNotNull(getJsonFieldValue(reg, "geometry"));
+
 		JSONObject properties = reg.getJSONObject("properties");
-		assertNotNull(getJsonFieldValue(properties, "id"));
 		assertNotNull(getJsonFieldValue(properties, "date"));
 		assertNotNull(getJsonFieldValue(properties, "plage_hora"));
 		assertNotNull(getJsonFieldValue(properties, "jour_nuit"));
@@ -152,11 +154,11 @@ public class UpLoadFileManagementGTImplTest {
 		assertNotNull(getJsonFieldValue(properties, "f_annee"));
 	}
 
-    private String getJsonFieldValue(JSONObject properties, String field) {
+    private Object getJsonFieldValue(JSONObject properties, String field) {
 
-        String value;
+        Object value;
         try {
-            value = properties.getString(field);
+            value = properties.get(field);
         } catch (JSONException e) {
             value = null;
         }
@@ -193,40 +195,6 @@ public class UpLoadFileManagementGTImplTest {
 
         testGetGeofileToJSON(fullName, null);
 
-    }
-
-    @Test
-    public void testMIFAsJSON() throws Exception {
-
-        String fileName = "pigma_regions_POLYGON.mif";
-        String fullName = makeFullName(fileName);
-
-        testGetGeofileToJSON(fullName, null);
-    }
-
-    /**
-     * Tests the coordinates order.
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void testMIFCoordinatesEPSG4326() throws Exception {
-
-        String fileName = "mif_4326_accidents.mif";
-        String fullName = makeFullName(fileName);
-
-        String json = testGetGeofileToJSON(fullName, "EPSG:4326");
-
-        assertCoordinateContains(-2.265330624649336, 48.421434814828025, json);
-    }
-
-    @Test
-    public void testMIFAsJSONReprojectedTo2154() throws Exception {
-
-        String fileName = "pigma_regions_POLYGON.mif";
-        String fullName = makeFullName(fileName);
-
-        testGetGeofileToJSON(fullName, "EPSG:2154");
     }
 
     /**
@@ -337,8 +305,7 @@ public class UpLoadFileManagementGTImplTest {
 	 * @return UpLoadFileManagement set with geotools implementation
 	 */
 	protected UpLoadFileManagement create() throws IOException {
-		return UpLoadFileManagement
-				.create(UpLoadFileManagement.Implementation.geotools);
+		return UpLoadFileManagement.create();
 	}
 
     /**

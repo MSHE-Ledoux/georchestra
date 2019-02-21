@@ -35,6 +35,8 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletContext;
 import java.io.*;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Email {
 
@@ -48,16 +50,19 @@ public class Email {
     private String bodyEncoding;
     private String subjectEncoding;
     private String templateEncoding;
-    private String[] recipients;
+    private List<String> recipients;
     private String subject;
 	private String emailBody;
 
+    private String publicUrl;
+    private String instanceName;
 	protected GeorchestraConfiguration georConfig;
 
-    public Email(String[] recipients,
+    public Email( List<String> recipients,
                  String emailSubject, String smtpHost, int smtpPort, boolean emailHtml, String replyTo, String from,
                  String bodyEncoding, String subjectEncoding, String templateEncoding, String fileTemplate,
-                 ServletContext servletContext, GeorchestraConfiguration georConfig) {
+                 ServletContext servletContext, GeorchestraConfiguration georConfig,
+                 String publicUrl, String instanceName) {
 
         this.recipients = recipients;
         this.subject = emailSubject;
@@ -70,6 +75,8 @@ public class Email {
         this.subjectEncoding = subjectEncoding;
         this.templateEncoding = templateEncoding;
         this.georConfig = georConfig;
+        this.publicUrl = publicUrl;
+        this.instanceName = instanceName;
 
         // Load template from filesystem
         this.emailBody = this.loadBody(servletContext.getRealPath(fileTemplate));
@@ -89,7 +96,7 @@ public class Email {
                 ", from='" + from + '\'' +
                 ", bodyEncoding='" + bodyEncoding + '\'' +
                 ", subjectEncoding='" + subjectEncoding + '\'' +
-                ", recipients=" + Arrays.toString(recipients) +
+                ", recipients=" + recipients.stream().collect(Collectors.joining(",")) +
                 ", subject='" + subject + '\'' +
                 ", emailBody='" + emailBody + '\'' +
                 '}';
@@ -136,7 +143,8 @@ public class Email {
 	public MimeMessage send(boolean reallySend) throws MessagingException {
 
 		// Replace {publicUrl} token with the configured public URL
-        this.emailBody = this.emailBody.replaceAll("\\{publicUrl\\}", this.georConfig.getProperty("publicUrl"));
+        this.emailBody = this.emailBody.replaceAll("\\{publicUrl\\}", publicUrl);
+        this.emailBody = this.emailBody.replaceAll("\\{instanceName\\}", instanceName);
         LOG.debug("body: " + this.emailBody);
 
         final Session session = Session.getInstance(System.getProperties(), null);
@@ -170,7 +178,7 @@ public class Email {
         // Finally send the message
         if(reallySend)
             Transport.send(message);
-        LOG.debug("email has been sent to:\n" + Arrays.toString(recipients));
+        LOG.debug("email has been sent to:\n" + recipients.stream().collect(Collectors.joining(",")));
         return message;
 	}
 

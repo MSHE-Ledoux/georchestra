@@ -37,30 +37,9 @@
 <%
 Boolean anonymous = true;
 Boolean admin = false;
-Boolean georDatadirActivated = false;
-
-String instanceName = null;
-String defaultLanguage = null;
-String georCustomPath = "/app/js/GEOR_custom.js";
-
-try {
-  ApplicationContext ctx = RequestContextUtils.getWebApplicationContext(request);
-  instanceName = ctx.getBean(GeorchestraConfiguration.class).getProperty("instance");
-  defaultLanguage = ctx.getBean(GeorchestraConfiguration.class).getProperty("language");
-  if ((ctx.getBean(GeorchestraConfiguration.class) != null)
-    && (((GeorchestraConfiguration) ctx.getBean(GeorchestraConfiguration.class)).activated())) {
-      georDatadirActivated = true;
-      georCustomPath = "/ws/app/js/GEOR_custom.js";
-    }
-} catch (Exception e) {
-}
 
 // the context path (might not be the public context path ! -> to be improved with https://github.com/georchestra/georchestra/issues/227)
 String context = request.getContextPath().split("-")[0]; // eg /mapfishapp
-
-if (instanceName == null) {
-  instanceName = "geOrchestra";
-}
 
 Locale rLocale = request.getLocale();
 ResourceBundle bundle = org.georchestra.mapfishapp.ws.Utf8ResourceBundle.getBundle("org.georchestra.mapfishapp.i18n.index", rLocale);
@@ -68,7 +47,7 @@ ResourceBundle bundle = org.georchestra.mapfishapp.ws.Utf8ResourceBundle.getBund
 String detectedLanguage = rLocale.getLanguage();
 String forcedLang = request.getParameter("lang");
 
-String lang = defaultLanguage;
+String lang = request.getParameter("defaultLanguage");
 if (forcedLang != null) {
     if (forcedLang.equals("en") || forcedLang.equals("es") || forcedLang.equals("ru") || forcedLang.equals("fr") || forcedLang.equals("de")) {
         lang = forcedLang;
@@ -129,7 +108,7 @@ if(sec_roles != null) {
             font: normal 12px arial,tahoma,sans-serif;
         }
     </style>
-    <title lang="<%= lang %>" dir="ltr"><fmt:message key="title.visual"/> - <%= instanceName %></title>
+    <title lang="<%= lang %>" dir="ltr"><fmt:message key="title.visual"/> - ${instanceName}</title>
 
     <link rel="stylesheet" type="text/css" href="<%= context %>/lib/externals/ext/resources/css/ext-all.css" />
     <link rel="stylesheet" type="text/css" href="<%= context %>/lib/externals/ext/resources/css/xtheme-gray.css" />
@@ -167,7 +146,7 @@ if(sec_roles != null) {
     <!--
         loading custom parameters (see build profile)
     -->
-    <script type="text/javascript" src="<%= context %><%= georCustomPath %>"></script>
+    <script type="text/javascript" src="<%= context %>${georCustomPath}"></script>
     
     <c:choose>
         <c:when test='<%= request.getParameter("debug") != null %>'>

@@ -1,6 +1,8 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to help us improve.
+
+If the bug is a security issue, please **do not fill an issue**, and instead send a mail to <psc@georchestra.org>.
 
 ---
 
@@ -9,7 +11,7 @@ A clear and concise description of what the bug is.
 
 **geOrchestra version or branch**
 
-eg: 16.12 or 17.12 or master ?
+eg: 17.12 or 18.06 or master ?
 
 **To Reproduce**
 Steps to reproduce the behavior:
