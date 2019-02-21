@@ -19,17 +19,20 @@
 
 package org.georchestra.console.ws.edituserdetails;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.georchestra.console.ds.AccountDao;
 import org.georchestra.console.ds.DataServiceException;
 import org.georchestra.console.ds.DuplicatedEmailException;
 import org.georchestra.console.ds.OrgsDao;
 import org.georchestra.console.dto.Account;
+import org.georchestra.console.dto.AccountImpl;
 import org.georchestra.console.dto.Org;
 import org.georchestra.console.ws.utils.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -93,11 +96,12 @@ public class EditUserDetailsFormController {
 		}
 
 		try {
+			Account userAccount = this.accountDao.findByUID(request.getHeader("sec-username"));
+
+			model.addAttribute(createForm(userAccount));
+			model.addAttribute("org", orgToJson(this.orgsDao.findForUser(userAccount)));
 
 			HttpSession session = request.getSession();
-			EditUserDetailsFormBean formBean = createForm(this.accountDao.findByUID(request.getHeader("sec-username")));
-
-			model.addAttribute(formBean);
 			for (String f : fields) {
 				if (this.validation.isUserFieldRequired(f)) {
 					session.setAttribute(f + "Required", "true");
@@ -131,6 +135,7 @@ public class EditUserDetailsFormController {
 		formBean.setFacsimile(account.getFacsimile());
 		formBean.setDescription(account.getDescription());
 		formBean.setPostalAddress(account.getPostalAddress());
+
 		if(account.getOrg().length() > 0) {
 			Org org = this.orgsDao.findByCommonName(account.getOrg());
 			formBean.setOrg(org.getName());
@@ -170,17 +175,14 @@ public class EditUserDetailsFormController {
 		}
 
 		// Validate first name and surname
-		if(!StringUtils.hasLength(formBean.getFirstName()) && this.validation.isUserFieldRequired("firstName"))
-			resultErrors.rejectValue("firstName", "firstName.error.required", "required");
+		validation.validateUserFieldWithSpecificMsg("firstName", formBean.getFirstName(), resultErrors);
+		validation.validateUserFieldWithSpecificMsg("surname", formBean.getSurname(), resultErrors);
 
-		if(!StringUtils.hasLength( formBean.getSurname() ) && this.validation.isUserFieldRequired("surname"))
-			resultErrors.rejectValue("surname", "surname.error.required", "required");
-
-		this.validation.validateUserField("phone", formBean.getPhone(), resultErrors);
-		this.validation.validateUserField("facsimile", formBean.getFacsimile(), resultErrors);
-		this.validation.validateUserField("title", formBean.getTitle(), resultErrors);
-		this.validation.validateUserField("description", formBean.getDescription(), resultErrors);
-		this.validation.validateUserField("postalAddress", formBean.getPostalAddress(), resultErrors);
+		validation.validateUserField("phone", formBean.getPhone(), resultErrors);
+		validation.validateUserField("facsimile", formBean.getFacsimile(), resultErrors);
+		validation.validateUserField("title", formBean.getTitle(), resultErrors);
+		validation.validateUserField("description", formBean.getDescription(), resultErrors);
+		validation.validateUserField("postalAddress", formBean.getPostalAddress(), resultErrors);
 
 		if(resultErrors.hasErrors())
 			return "editUserDetailsForm";
@@ -189,9 +191,10 @@ public class EditUserDetailsFormController {
 		try {
 
 			Account account = modify(this.accountDao.findByUID(request.getHeader("sec-username")), formBean);
-			this.accountDao.update(account, request.getHeader("sec-username"));
+			accountDao.update(account, request.getHeader("sec-username"));
 
 			model.addAttribute("success", true);
+			model.addAttribute("org", orgToJson(this.orgsDao.findForUser(account)));
 
 			return "editUserDetailsForm";
 
@@ -235,5 +238,32 @@ public class EditUserDetailsFormController {
 	@ModelAttribute("editUserDetailsFormBean")
 	public EditUserDetailsFormBean getEditUserDetailsFormBean() {
 		return new EditUserDetailsFormBean();
+	}
+
+	private ObjectNode orgToJson(Org org) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		if (org == null) {
+			return objectMapper.createObjectNode();
+		}
+
+		ObjectNode jsonOrg = objectMapper.valueToTree(org);
+		jsonOrg.replace("members", org.getMembers().stream()
+				.map(x -> uncheckedFindAccountByUID(x, objectMapper))
+				.collect(
+						() -> new ArrayNode(objectMapper.getNodeFactory()),
+						(col, elem) -> col.add(elem),
+						(col1, col2) -> col1.addAll(col2)));
+		return jsonOrg;
+	}
+
+	private ObjectNode uncheckedFindAccountByUID(String uid, ObjectMapper objectMapper) {
+		Account account;
+		try {
+			account = this.accountDao.findByUID(uid);
+		} catch (Exception e) {
+			account = new AccountImpl();
+			account.setUid(uid);
+		}
+		return objectMapper.valueToTree(account);
 	}
 }

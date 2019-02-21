@@ -1,19 +1,10 @@
 package org.georchestra.console.ws.backoffice;
 
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.Matchers.eq;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
 import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.ds.AccountDaoImpl;
-import org.georchestra.console.ds.RoleDaoImpl;
 import org.georchestra.console.ds.OrgsDao;
+import org.georchestra.console.ds.RoleDaoImpl;
 import org.georchestra.console.dto.Account;
 import org.georchestra.console.dto.AccountFactory;
 import org.georchestra.console.dto.Role;
@@ -37,12 +28,19 @@ import org.springframework.ldap.filter.PresentFilter;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 
 import javax.naming.directory.SearchControls;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Matchers.eq;
 
 public class UsersRolesControllerTest {
 
     private AccountDaoImpl dao;
     private RoleDaoImpl roleDao;
-    private OrgsDao orgDao;
     private UserRule userRule;
     private LdapTemplate ldapTemplate;
     private LdapContextSource contextSource;
@@ -192,25 +190,20 @@ public class UsersRolesControllerTest {
         userRule = new UserRule();
         userRule.setListOfprotectedUsers(new String[] { "geoserver_privileged_user" });
 
-
         // Configures roleDao
         roleDao = new RoleDaoImpl();
         roleDao.setLdapTemplate(ldapTemplate);
         roleDao.setRoleSearchBaseDN("ou=roles");
-        roleDao.setUniqueNumberField("ou");
-        roleDao.setUserSearchBaseDN("ou=users");
 
         OrgsDao orgsDao = new OrgsDao();
         orgsDao.setLdapTemplate(ldapTemplate);
         orgsDao.setOrgSearchBaseDN("ou=orgs");
-        orgsDao.setUserSearchBaseDN("ou=users");
 
         // configures AccountDao
-        dao = new AccountDaoImpl(ldapTemplate, roleDao, orgsDao);
-        dao.setUniqueNumberField("employeeNumber");
+        dao = new AccountDaoImpl(ldapTemplate);
         dao.setUserSearchBaseDN("ou=users");
-        dao.setRoleDao(roleDao);
-      
+        dao.setOrgSearchBaseDN("ou=orgs");
+        dao.setRoleSearchBaseDN("ou=roles");
     }
 
     private final String TEST_ROLE_NAME = "LDAPADMIN_TESTSUITE_SAMPLE_ROLE" ;

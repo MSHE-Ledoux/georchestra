@@ -38,7 +38,9 @@
     <link href='css/console.css' rel="stylesheet" />
     <title><s:message code="createAccountForm.title"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <c:if test="${recaptchaActivated}">
+      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    </c:if>
 </head>
 
 <body>
@@ -144,7 +146,7 @@
 
             <fieldset>
                 <legend><s:message code="createAccountForm.fieldset.credentials"/></legend>
-                <t:input path="uid" required="${uidRequired}" appendIcon="user">
+                <t:input path="uid" required="${uidRequired}" readonly="${readonlyUid}" appendIcon="user">
                     <jsp:attribute name="label"><s:message code="uid.label" /></jsp:attribute>
                 </t:input>
                 <t:password path="password" required="${passwordRequired}" spanId="pwdQuality" appendIcon="lock" onblur="passwordOnBlur();" onchange="cleanConfirmPassword();feedbackPassStrength('pwdQuality', value);" onkeypress="cleanConfirmPassword();" onkeyup="feedbackPassStrength('pwdQuality', value);">
@@ -155,9 +157,11 @@
                 </t:password>
             </fieldset>
 
+            <c:if test="${recaptchaActivated}">
             <fieldset>
                 <t:recaptcha path="g-recaptcha" />
             </fieldset>
+            </c:if>
 
             <fieldset>
                 <div class="form-group">
@@ -180,7 +184,7 @@
         var name = document.form.firstName.value;
         var surname = document.form.surname.value;
         var str = stringDeaccentuate(name.toLowerCase().charAt(0)+ surname.toLowerCase());
-        str = str.replace(/\W*/g, '');
+        str = str.replace(/[^a-z0-9_.-]*/gi, '');
         document.form.uid.value = str;
     }
     /**
@@ -218,7 +222,7 @@
     /* Validate the form */
     function validate() {
         if (testFirstname() & testSurname() & testEmail() & testUid() & testPassword() & testConfirmPassword() &
-                testRecaptcha() & testField("phone") & testField("title") & testField("description") & testOrg()
+               <c:if test="${recaptchaActivated}"> testRecaptcha() & </c:if> testField("phone") & testField("title") & testField("description") & testOrg()
         ) {
             return true;
         } else {

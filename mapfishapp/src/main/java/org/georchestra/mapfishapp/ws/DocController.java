@@ -31,13 +31,13 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.georchestra.commons.configuration.GeorchestraConfiguration;
-import org.georchestra.mapfishapp.model.ConnectionPool;
 import org.georchestra.mapfishapp.ws.classif.ClassifierCommand;
 import org.georchestra.mapfishapp.ws.classif.SLDClassifier;
-import org.geotools.data.wfs.impl.WFSDataStoreFactory;
+import org.geotools.data.wfs.WFSDataStoreFactory;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,6 +45,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.google.common.annotations.VisibleForTesting;
 
 // TODO: KML, GML, CSV services: do not store files, this is useless
 // instead, implement a generic "echo" service with custom mime type, as specified by client.
@@ -77,14 +79,14 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public class DocController {
 
 	/** the temporary directory used by the document services*/
-    private String docTempDir;
+    private String docTempDir = "/tmp";
 
     @Autowired
     public GeorchestraConfiguration georchestraConfiguration;
 
     /** the connection pool used by the document services*/
     @Autowired
-    private ConnectionPool connectionPool;
+    private DataSource connectionPool;
 
     /**
      * variable name that has to be used on client side
@@ -134,8 +136,6 @@ public class DocController {
 
     public void init() throws IOException {
         if (georchestraConfiguration.activated()) {
-            docTempDir = georchestraConfiguration.getProperty("docTempDir");
-
             Properties userPasswordCreds = georchestraConfiguration.loadCustomPropertiesFile("credentials");
             credentials.clear();
             for (String key : userPasswordCreds.stringPropertyNames()) {
@@ -154,7 +154,7 @@ public class DocController {
 
 
 	// needed for tests
-	public void setConnectionPool(ConnectionPool cp) {
+	public @VisibleForTesting void setConnectionPool(DataSource cp) {
 	    connectionPool = cp;
     }
 

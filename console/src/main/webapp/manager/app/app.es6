@@ -48,10 +48,16 @@ class AppController {
 }
 
 class StandaloneController {
-  static $inject = [ '$scope', 'Orgs' ]
+  static $inject = [ '$scope', 'Orgs', 'User' ]
 
-  constructor ($scope, Org) {
-    $scope.org = new Org()
+  constructor ($scope, Org, User) {
+    if (!window.org) {
+      $scope.org = new Org()
+      return
+    }
+
+    $scope.org = window.org
+    $scope.users = window.org.members
   }
 }
 

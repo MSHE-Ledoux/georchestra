@@ -19,52 +19,19 @@
 
 package org.georchestra.security;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.ProxySelector;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.DeflaterInputStream;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.Closer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.ProtocolException;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
@@ -75,18 +42,22 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
 import org.georchestra.commons.configuration.GeorchestraConfiguration;
 import org.georchestra.ogcservstatistics.log4j.OGCServiceMessageFormatter;
+import org.georchestra.ogcservstatistics.log4j.OGCServicesAppender;
 import org.georchestra.security.permissions.Permissions;
 import org.georchestra.security.permissions.UriMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.core.Authentication;
@@ -97,8 +68,47 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.Closer;
+import javax.annotation.Nullable;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.DeflaterInputStream;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * This proxy provides an indirect access to a remote host to retrieve data.
@@ -132,16 +142,31 @@ import com.google.common.io.Closer;
 public class Proxy {
     protected static final Log logger = LogFactory.getLog(Proxy.class.getPackage().getName());
     protected static final Log statsLogger = LogFactory.getLog(Proxy.class.getPackage().getName() + ".statistics");
-    protected static final Log commonLogger = LogFactory.getLog(Proxy.class.getPackage().getName() + ".statistics-common");
+    private static final org.apache.http.client.RedirectStrategy NO_REDIRECT_STRATEGY = new org.apache.http.client.RedirectStrategy() {
+        @Override
+        public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws ProtocolException {
+            return false;
+        }
+
+        @Override
+        public HttpUriRequest getRedirect(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws ProtocolException {
+            return null;
+        }
+    };
 
     @Autowired
     private GeorchestraConfiguration georchestraConfiguration;
 
     /**
+     * Data source to set on {@link OGCServicesAppender#setDataSource}
+     */
+    private @Autowired @Qualifier("ogcStatsDataSource") DataSource ogcStatsDataSource;
+    
+    /**
      * must be defined
      */
     private String defaultTarget;
-    private String publicHostname = "https://georchestra.mydomain.org";
+    private String publicUrl = "https://georchestra.mydomain.org";
 
     private Map<String, String> targets = Collections.emptyMap();
     private HeadersManagementStrategy headerManagement = new HeadersManagementStrategy();
@@ -150,7 +175,6 @@ public class Proxy {
     private String defaultCharset = "UTF-8";
 
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-    private ServicesMonitoring servicesMonitoring = null;
 
     private Permissions proxyPermissions = null;
     private Permissions sameDomainPermissions;
@@ -159,13 +183,14 @@ public class Proxy {
     private Integer httpClientTimeout = 300000;
 
     private final static String setCookieHeader = "Set-Cookie";
+    private HttpAsyncClientBuilder httpAsyncClientBuilder;
 
     public void setHttpClientTimeout(Integer timeout) {
         this.httpClientTimeout = timeout;
     }
 
-    public void setPublicHostname(String publicHostname) {
-        this.publicHostname = publicHostname;
+    public void setPublicUrl(String publicUrl) {
+        this.publicUrl = publicUrl;
     }
 
     public Integer getHttpClientTimeout() {
@@ -174,6 +199,8 @@ public class Proxy {
 
     public void init() throws Exception {
 
+        OGCServicesAppender.setDataSource(ogcStatsDataSource);
+        
         if (targets != null) {
             for (String url : targets.values()) {
                 new URL(url); // test that it is a valid URL
@@ -216,13 +243,11 @@ public class Proxy {
         }
 
         // Create a deny permission for URL with same domain
-        String publicDomain = new URL(this.publicHostname).getHost();
+        String publicDomain = new URL(this.publicUrl).getHost();
         this.sameDomainPermissions = new Permissions();
         this.sameDomainPermissions.setDenied(Collections.singletonList(new UriMatcher().setDomain(publicDomain)));
         this.sameDomainPermissions.setAllowByDefault(true);
         this.sameDomainPermissions.init();
-
-        this.servicesMonitoring = new ServicesMonitoring(targets);
 
         // Proxy permissions not set by datadir
         if (proxyPermissionsFile != null && proxyPermissions == null) {
@@ -238,6 +263,7 @@ public class Proxy {
                 closer.close();
             }
         }
+        httpAsyncClientBuilder = createHttpAsyncClientBuilder();
     }
 
     /* ---------- start work around for no gateway option -------------- */
@@ -275,18 +301,6 @@ public class Proxy {
     }
 
     /**
-     * Entrypoint used for monitoring purposes.
-     *
-     * @param request
-     * @param response
-     * @throws IOException
-     */
-    @RequestMapping("/services_monitoring")
-    public void servicesMonitoring(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        this.servicesMonitoring.checkServices(request, response);
-    }
-
-    /**
      * Entrypoint used for login.
      *
      * @param request
@@ -319,7 +333,7 @@ public class Proxy {
         }
 
         /*
-         * - deny request with same domain as public_host - deny based on
+         * - deny request with same domain as publicUrl - deny based on
          * proxy-permissions.xml file
          */
         if (this.sameDomainPermissions.isDenied(url) || proxyPermissions.isDenied(url)) {
@@ -597,16 +611,9 @@ public class Proxy {
      * @param localProxy true if the request targets a security-proxyfied webapp (e.g. mapfishapp, ...), false otherwise
      */
     private void handleRequest(HttpServletRequest request, HttpServletResponse finalResponse, String sURL, boolean localProxy) {
-        HttpClientBuilder htb = HttpClients.custom().disableRedirectHandling();
 
-        RequestConfig config = RequestConfig.custom().setSocketTimeout(this.httpClientTimeout).build();
-        htb.setDefaultRequestConfig(config);
-
-        //
-        // Handle http proxy for external request.
-        // Proxy must be configured by system variables (e.g.: -Dhttp.proxyHost=proxy -Dhttp.proxyPort=3128)
-        htb.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
-        CloseableHttpClient httpclient = htb.build();
+        CloseableHttpAsyncClient httpclient = httpAsyncClientBuilder.build();
+        httpclient.start();
 
         HttpResponse proxiedResponse = null;
         int statusCode = 500;
@@ -659,24 +666,9 @@ public class Proxy {
                     statsLogger.info(OGCServiceMessageFormatter.format(authentication.getName(), sURL, org, roles));
                 
                 }
-                	
+                    
             } catch (Exception e) {
                 logger.error("Unable to log the request into the statistics logger", e);
-            }
-
-            if (localProxy) {
-                //
-                // Hack for geoserver
-                // Should not be here. We must use a ProxyTarget class and
-                // define
-                // if Host header should be forwarded or not.
-                //
-                proxyingRequest.setHeader("Host", request.getHeader("Host"));
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Host header set to: " + proxyingRequest.getFirstHeader("Host").getValue()
-                            + " for proxy request.");
-                }
             }
 
             proxiedResponse = executeHttpRequest(httpclient, proxyingRequest);
@@ -716,11 +708,22 @@ public class Proxy {
                 }
             }
 
+            //process response headers before handling redirect or performing request
             headerManagement.copyResponseHeaders(request, request.getRequestURI(), proxiedResponse, finalResponse, this.targets);
 
-            if (statusCode == 302 || statusCode == 301) {
-                adjustLocation(request, proxiedResponse, finalResponse);
+            //Handle redirects
+            if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                Optional<String> adjustedLocation = adjustLocation(request, proxiedResponse);
+                if (adjustedLocation.isPresent()) {
+                	logger.debug("Handling redirect to " + adjustedLocation.get());
+                    finalResponse.setStatus(statusCode);
+                    finalResponse.setHeader("Location", adjustedLocation.get());
+                } else {
+                    finalResponse.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Unable to proxify redirect URL");
+                }
+                return;
             }
+
             // get content type
             String contentType = null;
             if (proxiedResponse.getEntity() != null && proxiedResponse.getEntity().getContentType() != null) {
@@ -735,7 +738,7 @@ public class Proxy {
                 logger.debug("charset not required for contentType: " + contentType);
                 doHandleRequest(request, finalResponse, proxiedResponse);
             }
-        } catch (IOException e) {
+        } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
             // connection problem with the host
             logger.error("Exception occured when trying to connect to the remote host: ", e);
             try {
@@ -754,6 +757,19 @@ public class Proxy {
         }
     }
 
+    private HttpAsyncClientBuilder createHttpAsyncClientBuilder() {
+        HttpAsyncClientBuilder htb = HttpAsyncClients.custom().setRedirectStrategy(NO_REDIRECT_STRATEGY);
+
+        RequestConfig config = RequestConfig.custom().setSocketTimeout(this.httpClientTimeout).build();
+        htb.setDefaultRequestConfig(config);
+
+        //
+        // Handle http proxy for external request.
+        // Proxy must be configured by system variables (e.g.: -Dhttp.proxyHost=proxy -Dhttp.proxyPort=3128)
+        htb.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
+        return htb;
+    }
+
     /**
      * Extracts the set-cookie http header from the downstream response.
      *
@@ -770,47 +786,39 @@ public class Proxy {
     }
 
     @VisibleForTesting
-    protected HttpResponse executeHttpRequest(HttpClient httpclient, HttpRequestBase proxyingRequest) throws IOException {
-        return httpclient.execute(proxyingRequest);
+    protected HttpResponse executeHttpRequest(CloseableHttpAsyncClient httpclient, HttpRequestBase proxyingRequest) throws IOException, TimeoutException, ExecutionException, InterruptedException {
+        Future<HttpResponse> future = httpclient.execute(proxyingRequest, null);
+        return future.get(5, TimeUnit.MINUTES);
     }
 
-    private void copyLocationHeaders(HttpResponse proxiedResponse, HttpServletResponse finalResponse) {
-        for (Header locationHeader : proxiedResponse.getHeaders("Location")) {
-            finalResponse.addHeader(locationHeader.getName(), locationHeader.getValue());
-        }
+    private @Nullable String extractLocationHeader(HttpResponse proxiedResponse) {
+        Header location = proxiedResponse.getFirstHeader("Location");
+        return location == null ? null : location.getValue();
     }
 
-    private void adjustLocation(HttpServletRequest request, HttpResponse proxiedResponse, HttpServletResponse finalResponse) {
+    private Optional<String> adjustLocation(HttpServletRequest request, HttpResponse proxiedResponse) {
         if (logger.isDebugEnabled()) {
             logger.debug("adjustLocation called for request: " + request.getRequestURI());
         }
-        String target = findMatchingTarget(request);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("adjustLocation found target: " + target + " for request: " + request.getRequestURI());
-        }
-
-        if (target == null) {
-            copyLocationHeaders(proxiedResponse, finalResponse);
-            return;
-        }
-
-        String baseURL = targets.get(target);
-        URI baseURI = null;
-
-        try {
-            baseURI = new URI(baseURL);
-        } catch (URISyntaxException e) {
-            copyLocationHeaders(proxiedResponse, finalResponse);
-            return;
-        }
-
-        for (Header locationHeader : proxiedResponse.getHeaders("Location")) {
+        
+        final String target = findMatchingTarget(request);
+        final String locationHeader = extractLocationHeader(proxiedResponse);
+        
+        String adjustedLocation = locationHeader;
+        
+        if (target != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("adjustLocation process header: " + locationHeader.getValue());
+                logger.debug("adjustLocation found target: " + target + " for request: " + request.getRequestURI());
             }
+
+            final String baseURL = targets.get(target);
+            final URI baseURI;
             try {
-                URI locationURI = new URI(locationHeader.getValue());
+                baseURI = new URI(baseURL);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("adjustLocation process header: " + locationHeader);
+                }
+                URI locationURI = new URI(locationHeader);
                 URI resolvedURI = baseURI.resolve(locationURI);
 
                 if (logger.isDebugEnabled()) {
@@ -818,22 +826,22 @@ public class Proxy {
                 }
                 if (resolvedURI.toString().startsWith(baseURI.toString())) {
                     // proxiedResponse.removeHeader(locationHeader);
-                    String newLocation = "/" + target + "/" + resolvedURI.toString().substring(baseURI.toString().length());
-                    finalResponse.addHeader("Location", newLocation);
-                    // Header newLocationHeader = new BasicHeader("Location",
-                    // newLocation);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("adjustLocation from: " + locationHeader.getValue() + " to " + newLocation);
+                    String resolvedSuffix = resolvedURI.toString().substring(baseURI.toString().length());
+                    String newLocation = "/" + target;
+                    if(!resolvedSuffix.startsWith("/")) {
+                        newLocation += "/";
                     }
-                    // proxiedResponse.addHeader(newLocationHeader);
-                } else {
-                    finalResponse.addHeader(locationHeader.getName(), locationHeader.getValue());
+                    newLocation += resolvedSuffix;
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("adjustLocation from: " + locationHeader + " to " + newLocation);
+                    }
+                    adjustedLocation = newLocation;
                 }
             } catch (URISyntaxException e) {
-                finalResponse.addHeader(locationHeader.getName(), locationHeader.getValue());
+                logger.info("Error creating baseURI from baseURL, leaving original Location header untouched", e);
             }
         }
-
+        return Optional.ofNullable(adjustedLocation);
     }
 
     /**
@@ -1357,6 +1365,10 @@ public class Proxy {
 
     public Permissions getProxyPermissions() {
         return proxyPermissions;
+    }
+
+    public @VisibleForTesting void setOgcStatsDataSource(DataSource ogcStatsDataSource) {
+        this.ogcStatsDataSource = ogcStatsDataSource;
     }
 
 }

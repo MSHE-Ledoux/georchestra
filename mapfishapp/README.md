@@ -5,7 +5,7 @@ Mapfishapp is geOrchestra's advanced viewer and editor.
 
 With it, you can :
  * browse through CSW, WMTS, WMS & WFS services and add any layer to the current map,
- * upload geo files for viewing (shapefile, mif/mid, tab, kml, gml, gpx),
+ * upload geo files for viewing (shapefile, tab, kml, gml, gpx),
  * create custom SLDs and style WMS layers, 
  * query layers either with a simple tool or an advanced one supporting conditions on attributes and geometries,
  * share your map with a permalink, or save it as a WMC file and restore it later,
@@ -166,7 +166,7 @@ Recenter on referentials
 
 The application features a "recenter on referentials" widget, which enables users to search for any object they are familiar with (eg: states, cities, forests, ...).
 
-This widget auto-configures itself with a GeoServer namespace (see **NS_LOC** config option in your config's GEOR_custom.js). By default, NS_LOC is set to "geor_loc", which means that any layer belonging to the geor_loc namespace will be available in the widget.
+This widget auto-configures itself with a GeoServer namespace (see `NS_LOC` config option in your datadir's GEOR_custom.js). By default, `NS_LOC` is set to "geor_loc", which means that any layer belonging to the geor_loc namespace will be available in the widget.
 
 Each "referential" layer should obey these simple rules:
  * it has exactly one geometry column and one string column,
@@ -183,12 +183,14 @@ Currently, the integrated editor supports:
 
 Every WMS layer:
  * with a WFS equivalent service, **and**
- * whose URL matches the GEOR.config.EDITABLE_LAYERS regexp (provided by your config) 
-... is available for edition.
+ * whose URL matches the `GEOR.config.EDITABLE_LAYERS` regexp (provided by the config)
+
+ ... is available for edition.
 
 By default:
- * the template config provides ```GEOR.config.EDITABLE_LAYERS = /.*@shared.server.name@.*/i``` which means that all WMS layers served by the platform host will be editable.
- * members of the ADMINISTRATOR group have the ability to see the edit functions provided by /mapfishapp/. This can be configured in GEOR_custom.js (in your profile), please have a look at the ROLES_FOR_EDIT config option.
+ * the config provides `GEOR.config.EDITABLE_LAYERS = /.*/i` which means that all WMS layers will be editable.
+ * it is overriden by the `GEOR.custom.EDITABLE_LAYERS` if set. By default, the [datadir](https://github.com/georchestra/datadir/blob/master/mapfishapp/js/GEOR_custom.js) provides `GEOR.custom.EDITABLE_LAYERS = /.*georchestra.mydomain.org.*/i`, which means that all WMS layers served by the platform host will be editable.
+ * members of the ADMINISTRATOR group have the ability to see the edit functions provided by /mapfishapp/. This can be configured in GEOR_custom.js (in the datadir), please have a look at the `ROLES_FOR_EDIT` config option.
 
 In case the user does not have the rights to edit a layer, the first transaction will fail, and the changes will be lost.
 
@@ -228,22 +230,20 @@ This mode is useful for **demo** or **development** purposes.
 The *first* time only, you have to compile mapfishapp and it's dependencies.  
 From the project root:
 
-    $ mvn -Dmaven.test.skip=true -Ptemplate -P-all,mapfishapp install
+    $ mvn -Dmaven.test.skip=true -P-all,mapfishapp install
 
 Clone the [geOrchestra datadir](https://github.com/georchestra/datadir/) into eg `/etc/georchestra`, checkouting the same branch name as your geOrchestra sources.
 
 Once this is done, running mapfishapp is pretty simple with Jetty:
 
     $ cd mapfishapp
-    $ mvn -Dgeorchestra.datadir=/etc/georchestra -Dmapfish-print-config=/etc/georchestra/mapfishapp/print/config.yaml jetty:run
+    $ mvn jetty:run
+
+If you installed the datadir in another directory, eg `/var/tmp/georchestra`, you will have to provide the following options:
+
+    $ mvn -Dgeorchestra.datadir=/var/tmp/georchestra -Dmapfish-print-config=/var/tmp/georchestra/mapfishapp/print/config.yaml jetty:run
 
 Then, point your browser to [http://localhost:8287/mapfishapp/?noheader=true](http://localhost:8287/mapfishapp/?noheader=true).
-
-Please note that if you make changes to your configuration, you have to run this command again:
-
-    $ cd config
-    $ mvn install
-
 
 **Want to trick the viewer into thinking you're logged in ?**
 

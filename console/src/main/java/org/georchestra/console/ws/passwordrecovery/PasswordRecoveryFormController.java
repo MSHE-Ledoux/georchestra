@@ -30,8 +30,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.georchestra.commons.configuration.GeorchestraConfiguration;
-import org.georchestra.console.Configuration;
 import org.georchestra.console.bs.ReCaptchaParameters;
 import org.georchestra.console.ds.AccountDao;
 import org.georchestra.console.ds.DataServiceException;
@@ -42,6 +40,7 @@ import org.georchestra.console.dto.Role;
 import org.georchestra.console.mailservice.EmailFactory;
 import org.georchestra.console.ws.utils.RecaptchaUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -81,20 +80,24 @@ public class PasswordRecoveryFormController  {
 	private RoleDao roleDao;
 	private EmailFactory emailFactory;
 	private UserTokenDao userTokenDao;
-	private Configuration config;
 	private ReCaptchaParameters reCaptchaParameters;
 
 	@Autowired
-	private GeorchestraConfiguration georConfig;
+	private boolean reCaptchaActivated;
+
+	@Value("${publicContextPath:/console}")
+	private String publicContextPath;
+
+	@Value("${publicUrl:https://georchestra.mydomain.org}")
+	private String publicUrl;
 
 	@Autowired
 	public PasswordRecoveryFormController( AccountDao dao,RoleDao gDao, EmailFactory emailFactory, UserTokenDao userTokenDao,
-			Configuration cfg, ReCaptchaParameters reCaptchaParameters){
+			ReCaptchaParameters reCaptchaParameters){
 		this.accountDao = dao;
 		this.roleDao = gDao;
 		this.emailFactory = emailFactory;
 		this.userTokenDao = userTokenDao;
-		this.config = cfg;
 		this.reCaptchaParameters = reCaptchaParameters;
 	}
 
@@ -112,6 +115,7 @@ public class PasswordRecoveryFormController  {
 		formBean.setEmail(email);
 
 		model.addAttribute(formBean);
+		model.addAttribute("recaptchaActivated", this.reCaptchaActivated);
 		session.setAttribute("reCaptchaPublicKey", this.reCaptchaParameters.getPublicKey());
 
 		return "passwordRecoveryForm";
@@ -137,20 +141,19 @@ public class PasswordRecoveryFormController  {
 						SessionStatus sessionStatus)
 						throws IOException {
 
-		RecaptchaUtils.validate(reCaptchaParameters, formBean.getRecaptcha_response_field(), resultErrors);
+		if (reCaptchaActivated) {
+			RecaptchaUtils.validate(reCaptchaParameters, formBean.getRecaptcha_response_field(), resultErrors);
+		}
 		if(resultErrors.hasErrors()){
 			return "passwordRecoveryForm";
 		}
 
 		try {
 			Account account = this.accountDao.findByEmail(formBean.getEmail());
-			List<Role> role = this.roleDao.findAllForUser(account.getUid());
 			// Finds the user using the email as key, if it exists a new token is generated to include in the unique http URL.
 
-			for (Role g : role) {
-				if (g.getName().equals(Role.PENDING)) {
-					throw new NameNotFoundException("User in PENDING role");
-				}
+			if (account.isPending()) {
+				throw new NameNotFoundException("User is pending");
 			}
 
 			String token = UUID.randomUUID().toString();
@@ -162,11 +165,10 @@ public class PasswordRecoveryFormController  {
 
 			this.userTokenDao.insertToken(account.getUid(), token);
 
-			String contextPath = this.config.getPublicContextPath();
-			String url = makeChangePasswordURL(this.georConfig.getProperty("publicUrl"), contextPath, token);
+			String url = makeChangePasswordURL(publicUrl, publicContextPath, token);
 
 			ServletContext servletContext = request.getSession().getServletContext();
-			this.emailFactory.sendChangePasswordEmail(servletContext, new String[]{account.getEmail()}, account.getCommonName(),  account.getUid(), url);
+			this.emailFactory.sendChangePasswordEmail(servletContext, account.getEmail(), account.getCommonName(),  account.getUid(), url);
 			sessionStatus.setComplete();
 
 			return "emailWasSent";
@@ -205,8 +207,16 @@ public class PasswordRecoveryFormController  {
 	public PasswordRecoveryFormBean getPasswordRecoveryFormBean() {
 		return new PasswordRecoveryFormBean();
 	}
-
-	public void setGeorConfig(GeorchestraConfiguration georConfig) {
-		this.georConfig = georConfig;
+	
+	public void setEmailFactory(EmailFactory emailFactory) {
+	    this.emailFactory = emailFactory;
+	}
+	
+	public void setPublicUrl(String publicUrl) {
+	    this.publicUrl = publicUrl;
+	}
+	
+	public void setPublicContextPath(String publicContextPath) {
+	    this.publicContextPath = publicContextPath;
 	}
 }

@@ -138,9 +138,6 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
         });
         this.emailField = new Ext.form.TextField({
             name: "email",
-            vtype: "email",
-            vtypeText: OpenLayers.i18n('This field should be an e-mail address'+
-                ' in the format user@domain.com'),
             allowBlank: false,
             width: FIELD_WIDTH,
             labelSeparator: OpenLayers.i18n("labelSeparator"),
@@ -207,13 +204,15 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
                     this.map.addControl(this.modifyControl);
                     this.modifyControl.selectFeature(this.layer.features[0]);
                 },
-                "hide": function() {
+                "close": function() {
                     this.map.removeControl(this.modifyControl);
                     this.modifyControl.unselectFeature(this.layer.features[0]);
                     this.map.removeLayer(this.layer);
+                    this.layer.destroyFeatures();
                     this.item && this.item.setChecked(false);
                     this.components && this.components.toggle(false);
                     this.layerRecord = null;
+                    this.win = null;
                 },
                 scope: this
             }
@@ -252,7 +251,7 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
             success: function(response) {
                 if (response.responseText &&
                     response.responseText.indexOf('<success>true</success>')>0){
-                    this.win.hide();
+                    this.win.close();
                     GEOR.util.infoDialog({
                         msg: OpenLayers.i18n('The extraction request succeeded'+
                             ', check your email.')
@@ -280,7 +279,7 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
         var okLayers = [],
             // extract only one layer or all visible ones ?
             layers = this.layerRecord ?
-                [this.layerRecord] : this.mapPanel.layers;
+                [this.layerRecord] : this.mapPanel.layers.getRange();
         Ext.each(layers, function(r) {
             var layer = r.getLayer();
             if (!layer.getVisibility() || !layer.url) {
@@ -311,7 +310,7 @@ GEOR.Addons.Extractor = Ext.extend(GEOR.Addons.Base, {
     },
 
     destroy: function() {
-        this.win && this.win.hide();
+        this.win && this.win.close();
         this.layer = null;
         this.jsonFormat = null;
         this.modifyControl = null;

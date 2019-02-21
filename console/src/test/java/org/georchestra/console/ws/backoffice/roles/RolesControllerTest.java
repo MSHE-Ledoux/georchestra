@@ -3,7 +3,13 @@ package org.georchestra.console.ws.backoffice.roles;
 import org.georchestra.console.dao.AdminLogDao;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.DelegationDao;
-import org.georchestra.console.ds.*;
+import org.georchestra.console.ds.AccountDao;
+import org.georchestra.console.ds.AccountDaoImpl;
+import org.georchestra.console.ds.DataServiceException;
+import org.georchestra.console.ds.OrgsDao;
+import org.georchestra.console.ds.RoleDaoImpl;
+import org.georchestra.console.dto.Account;
+import org.georchestra.console.dto.AccountImpl;
 import org.georchestra.console.dto.Role;
 import org.georchestra.console.dto.RoleFactory;
 import org.georchestra.console.model.DelegationEntry;
@@ -13,9 +19,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.ldap.NameNotFoundException;
-import org.springframework.ldap.core.*;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.ContextMapper;
+import org.springframework.ldap.core.DirContextOperations;
+import org.springframework.ldap.core.DistinguishedName;
+import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.support.LdapNameBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -28,11 +39,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import javax.naming.Name;
+import javax.naming.ldap.LdapName;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 
 public class RolesControllerTest {
@@ -70,20 +89,19 @@ public class RolesControllerTest {
 		// Configures roleDao
 		roleDao = new RoleDaoImpl();
 		roleDao.setLdapTemplate(ldapTemplate);
-		roleDao.setRoleSearchBaseDN(this.roleSearchBaseDN);
-		roleDao.setUniqueNumberField("ou");
-		roleDao.setUserSearchBaseDN("ou=users");
 		roleDao.setLogDao(logDao);
 		roleDao.setRoles(roles);
+		roleDao.setRoleSearchBaseDN("ou=roles");
 
         OrgsDao orgsDao = new OrgsDao();
         orgsDao.setLdapTemplate(ldapTemplate);
-        orgsDao.setOrgSearchBaseDN("ou=orgs");
-        orgsDao.setUserSearchBaseDN("ou=users");
 
-
-        AccountDao accountDao = new AccountDaoImpl(ldapTemplate, roleDao, orgsDao);
-
+        AccountDao accountDao = new AccountDaoImpl(ldapTemplate);
+        ((AccountDaoImpl)accountDao).setUserSearchBaseDN("ou=users");
+        ((AccountDaoImpl)accountDao).setOrgSearchBaseDN("ou=orgs");
+        ((AccountDaoImpl)accountDao).setRoleSearchBaseDN("ou=roles");
+        orgsDao.setAccountDao(accountDao);
+        roleDao.setAccountDao(accountDao);
 		roleCtrl = new RolesController(roleDao, userRule);
 		roleCtrl.setAccountDao(accountDao);
 
@@ -404,6 +422,10 @@ public class RolesControllerTest {
 	public void testUpdateUsersDataServiceException() throws Exception {
 		JSONObject toSend = new JSONObject().put("users", new JSONArray().put("testadmin").put("testuser"))
 				.put("PUT", new JSONArray().put("ADMINISTRATOR")).put("DELETE", new JSONArray().put("USERS"));
+
+        mockLdapTemplateLookupToReturnAccountFor("testadmin");
+        mockLdapTemplateLookupToReturnAccountFor("testuser");
+
 		request.setContent(toSend.toString().getBytes());
 		request.setRequestURI("/console/roles_users");
 
@@ -416,11 +438,16 @@ public class RolesControllerTest {
 	public void testUpdateUsers() throws Exception {
 		JSONObject toSend = new JSONObject().put("users", new JSONArray().put("testadmin").put("testuser"))
 				.put("PUT", new JSONArray().put("ADMINISTRATOR")).put("DELETE", new JSONArray().put("USERS"));
+
+        mockLdapTemplateLookupToReturnAccountFor("testadmin");
+        mockLdapTemplateLookupToReturnAccountFor("testuser");
+
 		request.setContent(toSend.toString().getBytes());
 		request.setRequestURI("/console/roles_users");
 		DirContextOperations context = Mockito.mock(DirContextOperations.class);
 		Mockito.when(ldapTemplate.lookupContext((Name) Mockito.any())).thenReturn(context);
 
+        //Mockito.when(ldapTemplate.lookup()).thenReturn(testUser);
 		roleCtrl.updateUsers(request, response);
 
 		JSONObject ret = new JSONObject(response.getContentAsString());
@@ -428,7 +455,21 @@ public class RolesControllerTest {
 		assertTrue(ret.getBoolean("success"));
 	}
 
-	@Test
+    private void mockLdapTemplateLookupToReturnAccountFor(String uuid) {
+        Account account = new AccountImpl();
+        account.setUid(uuid);
+        Mockito.doReturn(account).when(ldapTemplate).lookup(argThat(new ArgumentMatcher<LdapName>() {
+            @Override
+            public boolean matches(Object o) {
+                if (o == null) {
+                    return false;
+                }
+                return ((LdapName)o).get(1).equals(String.format("uid=%s", uuid));
+            }
+        }), Mockito.any(), Mockito.any(ContextMapper.class));
+    }
+
+    @Test
     public void testCheckAuthorizationOK(){
         roleCtrl.checkAuthorization("testuser",
                 Arrays.asList(new String[]{"testeditor", "testreviewer"}),

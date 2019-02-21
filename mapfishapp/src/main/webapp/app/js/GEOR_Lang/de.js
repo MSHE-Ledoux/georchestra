@@ -77,10 +77,6 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
     "Proportional symbols": "Proportionale Symbole",
     /* GEOR_FeatureDataModel.js strings */
     "objects": "Objekte",
-    /* GEOR_address.js strings */
-    "Go to: ": "Gehen zu : ",
-    "searching...": "suchen...",
-    "adressSearchExemple": "z.B.: Hausnummer, Straße, Ort",
     /* GEOR_ajaxglobal.js strings strings */
     "Server did not respond.": "Der Server hat nicht geantwortet.",
     "Server access denied.": "Der Server verweigert die Verbindung.",
@@ -148,7 +144,6 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
     "Upload a vector data file.": "Laden einer Datei mit vektoriellen Daten",
     "The allowed formats are the following: ": "folgende Formate sind gestattet : ",
     "Use ZIP compression for multifiles formats, such as": "Benützen Sie ZIP um Multidatei-Format zu komprimieren wie",
-    "fileupload_error_incompleteMIF": "Datei MIF/MID nicht komplett.",
     "fileupload_error_incompleteSHP": "Datei SHP nicht komplett.",
     "fileupload_error_incompleteTAB": "Datei TAB nicht komplett.",
     "fileupload_error_ioError": "I/O Fehler. Kontaktieren Sie den Administrator.",
@@ -160,6 +155,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
     "server upload error: ERROR":
         "Fehler beim Dateihochladen. ${ERROR}",
     /* GEOR_geonames.js strings */
+    "Go to: ": "Gehen zu : ",
     /* GEOR_getfeatureinfo.js strings */
     "<div>Searching...</div>": "<div>suchen...</div>",
     "<div>No layer selected</div>": "<div>kein Layer markiert</div>",
@@ -280,6 +276,10 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
     "Error while loading file": "Fehler beim Laden der Datei",
     /* GEOR_mappanel.js strings */
     "Coordinates in ": "Koordinaten im ",
+    "coordinates.short.x": "X",
+    "coordinates.short.y": "Y",
+    "coordinates.short.longitude": "Län",
+    "coordinates.short.latitude": "Bre",
     "scale picker": "Maβstab",
     /* GEOR_ows.js strings */
     "The NAME layer was not found in WMS service.":
@@ -436,7 +436,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
     "Available tools:": "Werkzeuge vorhanden :",
     "Click to select or deselect the tool": "Klicken um das Werkzeug abzuwählen",
     "Could not load addon ADDONNAME": "${ADDONNAME} Addon laden unmöglich",
-    "Your new tools are now available in the tools menu.": 'Ihre neuen Werkzeuge sind jetzt im Werkzeuge-Menu verfügbar',
+    "New tools are now available": "Neuen Werkzeuge sind jetzt verfügbar",
     /* GEOR_util.js strings */
     "Characters": "Zeichen",
     "Digital": "Digital",
@@ -516,7 +516,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
     // no trailing comma
 });
 
-GeoExt.Lang.add("fr", {
+GeoExt.Lang.add("de", {
     "GeoExt.ux.FeatureEditorGrid.prototype": {
         deleteMsgTitle: "Löschung",
         deleteMsg: "löschen bestätigen ?",

@@ -4,11 +4,14 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/beans/spring-beans.xsd
     http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+    http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:annotation-config/>
+ 
+    <context:property-placeholder location="file:${georchestra.datadir}/default.properties, file:${georchestra.datadir}/mapfishapp/mapfishapp.properties" ignore-resource-not-found="true" ignore-unresolvable="true" />
+
     <!-- autoscan these packages, the classic beans are defined in
          the next of the file. -->
     <context:component-scan base-package="org.georchestra.mapfishapp.addons.*"/>
@@ -18,38 +21,35 @@
     <!--  url mapping is directly handled with the spring annotations written in the following controllers -->
     <bean class="org.georchestra.mapfishapp.ws.OGCProxy" />
 
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="jdbcUrl" value="${jdbcUrl:jdbc:postgresql://localhost:5432/georchestra?user=georchestra&amp;password=georchestra}"/>
+        <property name="driverClass" value="org.postgresql.Driver"/>
+        <property name="initialPoolSize" value="1"/>
+        <property name="minPoolSize" value="${dataSource.minPoolSize:1}"/>
+        <property name="maxPoolSize" value="${dataSource.maxPoolSize:10}"/>
+        <property name="checkoutTimeout" value = "${dataSource.timeout:2000}"/>
+        <property name="idleConnectionTestPeriod" value="30"/>
+        <property name="maxIdleTime" value = "${dataSource.maxIdleTime:60}"/>
+        <property name="acquireIncrement" value="2"/>
+        <property name="testConnectionOnCheckout" value="true"/> <!-- Uses JDBC4's Connection.isValid() -->
+    </bean>
+
     <!-- File uploads --> 
     <bean id="multipartResolver"
       class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-        <property name="maxUploadSize">
-            <!--  Note: this value should be the maximum size specified at the bean 
-                  org.georchestra.mapfishapp.ws.UpLoadGeoFileController -->
-            <value>8388608</value>
-        </property>
-        <property name="MaxInMemorySize">
-            <!--  default value 10240 bytes -->
-            <value>10240</value> 
-        </property>
+        <property name="maxUploadSize" value="${maxUploadSize:8388608}"/>
+        <property name="maxInMemorySize" value="${maxInMemorySize:10240}"/>
     </bean>
 
     <bean class="org.georchestra.mapfishapp.ws.UpLoadGeoFileController" init-method="init">
         <property name="responseCharset" value="UTF-8"/>
         <property name="tempDirectory" value="/geoFileUploadsCache"/>
-        <property name="zipSizeLimit" value="8388608"/>
-        <property name="kmlSizeLimit" value="8388608"/>
-        <property name="gpxSizeLimit" value="8388608"/>
-        <property name="gmlSizeLimit" value="8388608"/>
-        <property name="osmSizeLimit" value="8388608"/>
-    </bean>
-
-
-    <bean id="pgpool" class="org.georchestra.mapfishapp.model.ConnectionPool" init-method="init">
-        <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/georchestra?user=georchestra&amp;password=georchestra" /> 
+        <property name="docTempDir" value="${docTempDir:/tmp}"/>
     </bean>
 
     <!-- Documents controller -->
     <bean class="org.georchestra.mapfishapp.ws.DocController" init-method="init">
-        <property name="docTempDir" value="/tmp"/>
+        <property name="docTempDir" value="${docTempDir:/tmp}"/>
         <property name="credentials">
             <map><entry key="georchestra.mydomain.org"><bean class="org.apache.commons.httpclient.UsernamePasswordCredentials"><constructor-arg index="0" value="geoserver_privileged_user:gerlsSnFd6SmM" /></bean></entry></map>
         </property>
@@ -61,6 +61,15 @@
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
         <property name="prefix" value="/WEB-INF/jsp/"/>
         <property name="suffix" value=".jsp"/>
+        <property name="attributes">
+            <map>
+                <entry key="instanceName" value="${instanceName:geOrchestra}" />
+                <entry key="defaultLanguage" value="${language:en}" />
+                <entry key="georCustomPath" value="${georCustomPath:/ws/app/js/GEOR_custom.js}" />
+                <entry key="headerHeight" value="${headerHeight:90}" />
+                <entry key="headerUrl" value="${headerUrl:/header/}" />
+            </map>
+        </property>
       </bean>
 
     <bean id="georchestraConfiguration" class="org.georchestra.commons.configuration.GeorchestraConfiguration">

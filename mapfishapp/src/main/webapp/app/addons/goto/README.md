@@ -27,16 +27,14 @@ Example configuration:
     "options": {
         "projections": [{
             "srs": "EPSG:4326",
-            "name": "WGS84",
-            "labels": ["Longitude", "Latitude"]
+            "name": "WGS84"
         }, {
             "srs": "EPSG:2154",
-            "name": "Lambert 93",
-            "labels": ["X", "Y"]
+            "name": "Lambert 93"
         }]
     }
 }]
 ```
 
-If the `zoomLevel` option is set, the map is also zoomed to the givn zoom level.
+If the `zoomLevel` option is set, the map is also zoomed to the given zoom level.
 By default, `zoomLevel` is not set, which means the map gets paned only.

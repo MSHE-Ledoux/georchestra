@@ -2,62 +2,56 @@
 
 The "georchestra" database hosts several schemas, which are specific to the deployed modules:
 ```
-createuser -SDRI georchestra
-createdb -E UTF8 -T template0 -O georchestra georchestra
-psql -d georchestra -c "ALTER USER \"georchestra\" WITH PASSWORD 'georchestra';"
+CREATE USER georchestra WITH NOCREATEDB NOCREATEROLE PASSWORD 'georchestra';
+CREATE DATABASE georchestra WITH OWNER georchestra TEMPLATE template0 ENCODING UTF8;
 ```
 
 Note 1: It is of course possible to store webapp-specific schemas in separate databases, taking advantage of geOrchestra's extreme configurability.
 
-Note 2: PostGIS extensions are not required in the georchestra database, unless GeoFence is deployed (see below), or ```shared.psql.jdbc.driver=org.postgis.DriverWrapper``` in your configuration (but this is not the default setup).
+Note 2: PostGIS extensions are not required in the georchestra database, unless GeoFence is deployed (see below).
 
 ## Viewer schema
 
 If **mapfishapp** is deployed:
 ```
-psql -d georchestra -f postgresql/02-mapfishapp.sql
+psql -d georchestra -f postgresql/020-mapfishapp.sql
 ```
 
 ## Console schema
 
 If the **console** webapp is deployed:
 ```
-psql -d georchestra -f postgresql/04-console.sql
+psql -d georchestra -f postgresql/040-console.sql
 ```
 
 ## GeoFence schema
 
-If **geofence** is deployed: (make sure to set the correct values for the ```baseURL```, ```username``` and ```password``` fields in the ```geofence.gf_gsinstance``` table)
+If **geofence** is deployed:
 ```
-psql -d georchestra -c 'CREATE EXTENSION postgis;'
-wget --no-check-certificate https://raw.githubusercontent.com/georchestra/geofence/georchestra-15.06/doc/setup/sql/002_create_schema_postgres.sql -O /tmp/geofence.sql
-psql -d georchestra -f /tmp/geofence.sql
-```
-in the next query, replace every '@...@' with the values of your shared.maven.filters!
-```
-psql -d georchestra -c "INSERT INTO geofence.gf_gsinstance (id, baseURL, dateCreation, description, name, password, username) values (0, 'http(s)://@shared.server.name@/geoserver', 'now', 'locale geoserver', 'default-gs', '@shared.privileged.geoserver.pass@', '@shared.privileged.geoserver.user@');"
+psql -d georchestra -f postgresql/010-create-extension.sql
+psql -d georchestra -f postgresql/080-geofence.sql
 ```
 
 ## OGC statistics schema
 
-If the **security proxy** is deployed and ```shared.ogc.statistics.activated``` is true in your setup (false by default):
+If the **security proxy** is deployed and its log4j uses the `org.georchestra.ogcservstatistics.log4j.OGCServicesAppender` as configured in the [datadir](https://github.com/georchestra/datadir/blob/docker-master/security-proxy/log4j/log4j.properties):
 ```
-psql -d georchestra -f postgresql/05-ogc-server-statistics.sql
+psql -d georchestra -f postgresql/050-ogc-server-statistics.sql
 ```
 
 ### Extractorapp schema
 
 If the **extractor app** is deployed:
 ```
-psql -d georchestra -f postgresql/01-create-extension.sql
-psql -d georchestra -f postgresql/09-extractor-app.sql
+psql -d georchestra -f postgresql/010-create-extension.sql
+psql -d georchestra -f postgresql/090-extractor-app.sql
 ```
 
 ### Atlas schema
 
 If the **Atlas** is deployed:
 ```
-psql -d georchestra -f postgresql/07-atlas.sql
+psql -d georchestra -f postgresql/060-atlas.sql
 ```
 
 ## Change ownership of database objects
@@ -67,12 +61,13 @@ apps are running in same database), you can use following procedure to reset own
 example ```georchestra``` :
 
 ```
-wget https://raw.githubusercontent.com/georchestra/georchestra/15.12/postgresql/fix-owner.sql -O /tmp/fix-owner.sql
+wget https://raw.githubusercontent.com/georchestra/georchestra/master/postgresql/fix-owner.sql -O /tmp/fix-owner.sql
 psql -d georchestra -f /tmp/fix-owner.sql
 psql -d georchestra -c "SELECT change_owner('mapfishapp', 'georchestra');";
 psql -d georchestra -c "SELECT change_owner('console', 'georchestra');";
 psql -d georchestra -c "SELECT change_owner('ogcstatistics', 'georchestra');";
 psql -d georchestra -c "SELECT change_owner('extractorapp', 'georchestra');";
+psql -d georchestra -c "SELECT change_owner('geofence', 'georchestra');";
 psql -d georchestra -c "SELECT change_owner('atlas', 'georchestra');";
 psql -d georchestra -c "SELECT change_owner('public', 'georchestra');";
 ```

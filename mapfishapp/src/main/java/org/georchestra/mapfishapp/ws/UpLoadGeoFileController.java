@@ -79,21 +79,8 @@ import org.xml.sax.SAXParseException;
  * One of the following implementation can be set:
  *
  * <p>
- * <br>
- * OGR Implementation</br> accepts the following files: <lu>
- * <li>ESRI Shape in zip: shp, shx, prj file are expected</li>
- * <li>MapInfo MIF in zip: mif, mid file are expected</li>
- * <li>MapInfo TAB in zip: tab, id, map, dat are expected</li>
- * <li>kml</li>
- * <li>gpx</li>
- * <li>gml</li>
- * </lu>
- * </p>
- * <p>
- * <br>
  * Geotools Implementation </br> expects the following files <lu>
  * <li>ESRI Shape in zip: shp, shx, prj file are expected</li>
- * <li>MapInfo in zip: mif, mid file are expected</li>
  * <li>kml</li>
  * <li>gml</li>
  * </lu>
@@ -116,8 +103,7 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
 
     public void init() {
         if ((georConfig != null) && (georConfig.activated())) {
-            String baseTmpDirectory = georConfig.getProperty("docTempDir");
-            File tmpDir = new File(baseTmpDirectory, "/geoFileUploadsCache");
+            File tmpDir = new File(this.docTempDir, "/geoFileUploadsCache");
             if (! tmpDir.exists()) {
                 try {
                 FileUtils.forceMkdir(tmpDir);
@@ -192,22 +178,10 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
                 return "{\"success\": \"false\", \"error\":\"fileupload_error_multipleFiles\", \"msg\": \"multiple files\"}";
             }
         },
-        incompleteMIF {
-            @Override
-            public String getMessage(final String detail) {
-                return "{\"success\": \"false\", \"error\":\"fileupload_error_incompleteMIF\", \"msg\": \"incomplete MIF/MID\"}";
-            }
-        },
         incompleteSHP {
             @Override
             public String getMessage(final String detail) {
                 return "{\"success\": \"false\", \"error\":\"fileupload_error_incompleteSHP\", \"msg\": \"incomplete shapefile\"}";
-            }
-        },
-        incompleteTAB {
-            @Override
-            public String getMessage(final String detail) {
-                return "{\"success\": \"false\", \"error\":\"fileupload_error_incompleteTAB\", \"msg\": \"incomplete TAB file\"}";
             }
         },
         ready {
@@ -234,12 +208,7 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
     // constants configured in the ws-servlet.xml file
     private String responseCharset;
     private String tempDirectory;
-
-    private long zipSizeLimit;
-    private long kmlSizeLimit;
-    private long gpxSizeLimit;
-    private long gmlSizeLimit;
-    private long osmSizeLimit;
+    private String docTempDir = "/tmp";
 
     /**
      * The current file that was upload an is in processing
@@ -255,28 +224,12 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
         this.tempDirectory = tempDirectory;
     }
 
+    public void setDocTempDir(String docTempDir) {
+        this.docTempDir = docTempDir;
+    }
+
     public void setResponseCharset(String responseCharset) {
         this.responseCharset = responseCharset;
-    }
-
-    public void setZipSizeLimit(long zipSizeLimit) {
-        this.zipSizeLimit = zipSizeLimit;
-    }
-
-    public void setKmlSizeLimit(long kmlSizeLimit) {
-        this.kmlSizeLimit = kmlSizeLimit;
-    }
-
-    public void setGpxSizeLimit(long gpxSizeLimit) {
-        this.gpxSizeLimit = gpxSizeLimit;
-    }
-
-    public void setGmlSizeLimit(long gmlSizeLimit) {
-        this.gmlSizeLimit = gmlSizeLimit;
-    }
-
-    public void setOsmSizeLimit(long osmSizeLimit) {
-        this.osmSizeLimit = osmSizeLimit;
     }
 
     /**
@@ -351,8 +304,6 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
 
             fileManagement.setWorkDirectory(workDirectory);
 
-            long fileSize = 0;
-
             // upload file action
             if (request instanceof MultipartHttpServletRequest) {
                 MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -367,7 +318,6 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
                 }
                 String fileName = (String) fileNames.next();
                 upLoadFile = multipartRequest.getFile(fileName);
-                fileSize = upLoadFile.getSize();
                 currentFile = createFileDescriptor(upLoadFile
                         .getOriginalFilename());
             }
@@ -446,7 +396,6 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
                         + guessedExtension);
                 FileUtils.moveFile(destFile, renamedFile);
                 currentFile = new FileDescriptor(renamedFile.getCanonicalPath());
-                fileSize = renamedFile.length();
                 fileManagement.setFileDescriptor(currentFile);
                 fileManagement.setSaveFile(renamedFile);
                 fileManagement.addFileExtension(guessedExtension);
@@ -464,19 +413,6 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
 
             // processes the uploaded || downloaded file
             Status st = Status.ready;
-
-            // validates the size, depending on the file type.
-            // - it's a double-check, since normally
-            // a MaxUploadSizeExceededException has already been
-            // launched and handled
-            long limit = getSizeLimit(currentFile.originalFileExt);
-            if (fileSize > limit) {
-                long size = limit / MEGABYTE; // converts to Mb
-                final String msg = Status.sizeError.getMessage(size + "MB");
-                writeErrorResponse(response, Status.sizeError, msg,
-                        HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
-                return;
-            }
 
             // geofile uploaded - in case of downloaded file,
             // this has already been done.
@@ -705,51 +641,6 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
     }
 
     /**
-     * Returns the size limit (bytes) taking into account the file format.
-     *
-     * @param fileExtension
-     *
-     * @return the limit
-     */
-    private long getSizeLimit(final String fileExtension) {
-
-        if (this.zipSizeLimit <= 0)
-            throw new IllegalStateException("zipSizeLimit was not set");
-        if (this.kmlSizeLimit <= 0)
-            throw new IllegalStateException("kmlSizeLimit was not set");
-        if (this.gpxSizeLimit <= 0)
-            throw new IllegalStateException("gpxSizeLimit was not set");
-        if (this.gmlSizeLimit <= 0)
-            throw new IllegalStateException("gmlSizeLimit was not set");
-        if (this.osmSizeLimit <= 0)
-            throw new IllegalStateException("osmSizeLimit was not set");
-
-        if ("zip".equalsIgnoreCase(fileExtension)) {
-
-            return this.zipSizeLimit;
-
-        } else if ("kml".equalsIgnoreCase(fileExtension)) {
-
-            return this.kmlSizeLimit;
-
-        } else if ("gpx".equalsIgnoreCase(fileExtension)) {
-
-            return this.gpxSizeLimit;
-
-        } else if ("gml".equalsIgnoreCase(fileExtension)) {
-
-            return this.gmlSizeLimit;
-
-        } else if ("osm".equalsIgnoreCase(fileExtension)) {
-
-            return this.osmSizeLimit;
-
-        } else {
-            throw new IllegalArgumentException("Unsupported format");
-        }
-    }
-
-    /**
      * Creates a work directory for this request. An
      *
      * @param tempDirectory
@@ -793,10 +684,9 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
      * @return
      */
     private Status checkGeoFiles(UpLoadFileManagement fileManagement) {
-        // a zip file is unzipped to a temporary place and *.SHP, *.shp, *.MIF,
-        // *.MID, *.mif, *.mid files are looked for at the root of the archive.
-        // If several SHP files are found or several MIF or several MID, the
-        // error message is "multiple files"
+        // a zip file is unzipped to a temporary place and *.SHP and *.shp files
+        // are looked for at the root of the archive.
+        // If several SHP files are found, the error message is "multiple files"
         if (!fileManagement.checkGeoFileExtension()) {
             return Status.unsupportedFormat;
         }
@@ -805,23 +695,12 @@ public final class UpLoadGeoFileController implements HandlerExceptionResolver {
             return Status.multiplefiles;
         }
 
-        if (fileManagement.isMIF()) {
-            // if filename.mif is found, it is assumed that filename.mid exists
-            // too. If not: msg = "incomplete mif/mid
-            if (!fileManagement.checkMIFCompletness()) {
-                return Status.incompleteMIF;
-            }
-
-        } else if (fileManagement.isSHP()) {
+        if (fileManagement.isSHP()) {
             // if filename.shp is found, it is assumed that filename.shx and
             // filename.prj are also present (the DBF is not mandatory). If not:
             // msg = "incomplete shapefile"
             if (!fileManagement.checkSHPCompletness()) {
                 return Status.incompleteSHP;
-            }
-        } else if (fileManagement.isTAB()) {
-            if (!fileManagement.checkTABCompletness()) {
-                return Status.incompleteTAB;
             }
         }
 

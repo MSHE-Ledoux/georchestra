@@ -4,14 +4,14 @@
   <parent>
     <groupId>org.georchestra</groupId>
     <artifactId>geoserver-root</artifactId>
-    <version>18.06</version>
+    <version>19.06-SNAPSHOT</version>
   </parent>
   <artifactId>geoserver-webapp</artifactId>
   <packaging>war</packaging>
   <name>geOrchestra GeoServer Web Application</name>
   <properties>
     <packageName>georchestra-geoserver</packageName>
-    <packageDatadirScmVersion>18.06</packageDatadirScmVersion>
+    <packageDatadirScmVersion>18.12</packageDatadirScmVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -969,6 +969,16 @@
         <dependency>
           <groupId>org.geoserver.extension</groupId>
           <artifactId>gs-libjpeg-turbo</artifactId>
+          <version>${gs.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>s3-geotiff</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.geoserver.community</groupId>
+          <artifactId>gs-s3-geotiff</artifactId>
           <version>${gs.version}</version>
         </dependency>
       </dependencies>

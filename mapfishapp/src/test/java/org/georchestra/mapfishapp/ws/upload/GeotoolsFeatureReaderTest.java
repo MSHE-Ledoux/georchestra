@@ -18,6 +18,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.referencing.CRS;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -36,34 +37,15 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class GeotoolsFeatureReaderTest {
 
-	private AbstractFeatureGeoFileReader reader = new AbstractFeatureGeoFileReader(new GeotoolsFeatureReader());
+	private FeatureGeoFileReader reader;
 
-
+	@Before
+	public void setup() {
+		reader = new GeotoolsFeatureReader();
+	}
 	
 	public GeotoolsFeatureReaderTest() {
 		System.setProperty("org.geotools.referencing.forceXY", "true");
-	}
-	
-	/**
-	 * Tests that the geotools implementation is used when the current reader cannot read the file format.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testSwitchToGeotoolsReaderImpl() throws Exception {
-		
-		AbstractFeatureGeoFileReader reader = new AbstractFeatureGeoFileReader(new MockReader());
-
-		String fullName = makeFullName("points-4326.shp");
-		File file = new File(fullName);
-		
-		SimpleFeatureCollection fc = reader.getFeatureCollection(file, FileFormat.shp);
-		
-		assertFeatureCollection(fc,  2, 4326);
-		assertTrue(fc instanceof DefaultFeatureResults);
-		
-		// The readerImpl is restored after having used the GeoTools one
-		assertTrue( reader.readerImpl instanceof MockReader );
 	}
 	
 	@Test
@@ -196,31 +178,6 @@ public class GeotoolsFeatureReaderTest {
 	}
 	
 	
-	@Test
-	public void testMIFFormat() throws Exception {
-
-		String fullName = makeFullName("pigma_regions_POLYGON.mif");
-		File file = new File(fullName);
-		
-		SimpleFeatureCollection fc = reader.getFeatureCollection(file, FileFormat.mif);
-		
-		assertFeatureCollection(fc,  93, 4326);
-	}
-	
-	
-	@Test
-	public void testMIFFormatTo2154() throws Exception {
-		
-		final int epsgCode = 2154;
-
-		String fullName = makeFullName("pigma_regions_POLYGON.mif");
-		File file = new File(fullName);
-		
-		SimpleFeatureCollection fc = reader.getFeatureCollection(file, FileFormat.mif, CRS.decode("EPSG:"+ epsgCode));
-		
-		assertFeatureCollection(fc,  93, epsgCode);
-	}
-
 	@Test 
 	public void testGML2Format() throws Exception {
 
@@ -466,7 +423,7 @@ public class GeotoolsFeatureReaderTest {
 	public void testGetFormatList() throws IOException {
 
 		
-		EnumSet<FileFormat> gtRequiredFormats = EnumSet.of(FileFormat.shp, FileFormat.mif, FileFormat.gml, FileFormat.kml);
+		EnumSet<FileFormat> gtRequiredFormats = EnumSet.of(FileFormat.shp, FileFormat.gml, FileFormat.kml);
 		
 		FileFormat[] formats = reader.getFormatList();
 		for (int i = 0; i < formats.length; i++) {

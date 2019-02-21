@@ -29,7 +29,6 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
         "Feature attributes will be displayed in this panel.</p>",
     /* GEOR_ClassificationPanel.js strings */
     /* GEOR_FeatureDataModel.js strings */
-    /* GEOR_address.js strings */
     /* GEOR_ajaxglobal.js strings strings */
     "ajax.badresponse":
         "The server responded, but the content of the response is " +
@@ -58,7 +57,6 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
     "NB metadata match the query.": "${NB} metadata match the query.",
     /* GEOR_editing.js strings */
     /* GEOR_fileupload.js strings */
-    "fileupload_error_incompleteMIF": "Incomplete MIF/MID file.",
     "fileupload_error_incompleteSHP": "Incomplete shapefile.",
     "fileupload_error_incompleteTAB": "Incomplete TAB file.",
     "fileupload_error_ioError": "Server-side I/O exception. Contact platform administrator for more details.",
@@ -99,6 +97,10 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
         "insufficient rights, incompatible CRS or layer does not exist",
     "NB layers imported": "${NB} layers imported",
     /* GEOR_mappanel.js strings */
+    "coordinates.short.x": "X",
+    "coordinates.short.y": "Y",
+    "coordinates.short.longitude": "Lon",
+    "coordinates.short.latitude": "Lat",
     /* GEOR_ows.js strings */
     "The NAME layer was not found in WMS service.":
         "The ${NAME} layer was not found in WMS service.",

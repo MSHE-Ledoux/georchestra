@@ -17,11 +17,14 @@ public class SimpleAccount {
     @JsonProperty(UserSchema.ORG_KEY)
     private String orgName;
 
-    @JsonIgnore
+    @JsonProperty(UserSchema.ORG_ID_KEY)
     private String orgId;
 
     @JsonProperty(UserSchema.MAIL_KEY)
     private String email;
+
+    @JsonProperty(UserSchema.PENDING)
+    private boolean pending;
 
     public SimpleAccount(Account account) {
         this.uid = account.getUid();
@@ -29,6 +32,7 @@ public class SimpleAccount {
         this.surname = account.getSurname();
         this.orgId = account.getOrg();
         this.email = account.getEmail();
+        this.pending = account.isPending();
     }
 
     public String getUid() {
@@ -77,5 +81,13 @@ public class SimpleAccount {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isPending() {
+        return pending;
+    }
+
+    public void setPending(boolean pending) {
+        this.pending = pending;
     }
 }

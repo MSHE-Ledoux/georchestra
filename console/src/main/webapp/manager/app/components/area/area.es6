@@ -1,21 +1,36 @@
 require('components/area/area.tpl')
 
-class AreaController {
-  static $inject = [ '$injector', '$http' ]
+const buildStyle = (fillColor, strokeColor, width) => new ol.style.Style({
+  fill: new ol.style.Fill({ color: fillColor }),
+  stroke: new ol.style.Stroke({ color: strokeColor, width: width || 1 })
+})
+const highlightStyle = buildStyle([255, 0, 0, 0.5], [255, 0, 0, 0.2])
+const highlight = feature => {
+  feature.setStyle(highlightStyle)
+  setTimeout(() => feature.setStyle(), 250)
+  return feature
+}
 
-  constructor ($injector, $http) {
+class AreaController {
+  static $inject = [ '$injector', '$http', '$scope' ]
+
+  constructor ($injector, $http, $scope) {
     this.$injector = $injector
+    this.$scope = $scope
 
     let translate = $injector.get('translate')
     this.i18n = {}
     translate('area.updated', this.i18n)
     translate('area.error', this.i18n)
+    this.canExport = window.Blob && window.FileReader
   }
 
   $onInit () {
+    this.maponly = this.readonly === 'true'
     const $http = this.$injector.get('$http')
     const CONFIG_URI = this.$injector.get('CONSOLE_PUBLIC_PATH') + 'orgs/areaConfig.json'
     let promises = [ $http.get(CONFIG_URI).then(r => r.data) ]
+    this.canExport = this.canExport && this.item.id
     if (this.item.$promise) {
       promises.push(this.item.$promise)
     }
@@ -27,15 +42,11 @@ class AreaController {
     this.ids = this.item.cities || []
     this.groups = []
 
-    const buildStyle = (fillColor, strokeColor, width) => new ol.style.Style({
-      fill: new ol.style.Fill({ color: fillColor }),
-      stroke: new ol.style.Stroke({ color: strokeColor, width: width || 1 })
-    })
-
     const vector = new ol.layer.Vector({
       source: new ol.source.Vector(),
       style: buildStyle([ 255, 255, 255, 0.1 ], [ 0, 0, 0, 0.2 ])
     })
+    this.source = vector.getSource()
 
     const map = new ol.Map({
       target: document.querySelector('.map'),
@@ -57,12 +68,6 @@ class AreaController {
     this.collection = select.getFeatures()
 
     const format = new ol.format.GeoJSON()
-
-    const highlightStyle = buildStyle([255, 0, 0, 0.5], [255, 0, 0, 0.2])
-    const highlight = (feature) => {
-      feature.setStyle(highlightStyle)
-      setTimeout(() => feature.setStyle(), 250)
-    }
 
     this.loading = true
     this.$injector.get('$http').get(config.areas.url).then(
@@ -95,13 +100,23 @@ class AreaController {
         this.map.getView().setZoom(config.map.zoom)
       }
 
-      updateSelection(selected)
+      if (selected.length > 0) {
+        let extent = ol.extent.createEmpty()
+        selected.forEach(f => ol.extent.extend(extent, f.getGeometry().getExtent()))
+        this.map.getView().fit(extent, map.getSize())
+      }
+
+      this.updateSelection(selected)
       this.loading = false
     })
 
     map.getInteractions().push(select)
+    if (this.maponly) {
+      select.setActive(false)
+    }
+
     select.on('select', (e) => {
-      updateSelection([], true)
+      this.updateSelection([], true)
       e.selected.map(highlight)
     })
 
@@ -116,7 +131,7 @@ class AreaController {
         dragBox.getGeometry().getExtent(),
         (feature) => { selected.push(feature) }
       )
-      updateSelection(selected, true)
+      this.updateSelection(selected, true)
       dragBox.setActive(this.draw = false)
       select.setActive(true)
     })
@@ -150,30 +165,14 @@ class AreaController {
         let f = vector.getSource().getFeatureById(item.getAttribute('data-id'))
         if (select.getFeatures().getArray().indexOf(f) >= 0) {
           select.getFeatures().remove(f)
-          updateSelection([], true)
+          this.updateSelection([], true)
         } else {
-          updateSelection([f], true)
+          this.updateSelection([f], true)
         }
         f.setStyle(buildStyle([255, 0, 0, 0.5], [255, 0, 0, 0.2]))
         setTimeout(() => f.setStyle(), 350)
       }
     })
-
-    const updateSelection = (features, cumulative = false) => {
-      this.$injector.get('$timeout')(() => {
-        if (!cumulative) this.collection.clear()
-        const uniques = this.collection.getArray().concat(features).filter(
-          (item, index, self) => index === self.indexOf(item)
-        )
-        this.collection.clear()
-        this.collection.extend(uniques)
-        this.ids = uniques.map(f => f.getId())
-        features.map(highlight)
-        this.collection.getArray().sort(
-          (a, b) => a.get('_label').localeCompare(b.get('_label'))
-        )
-      })
-    }
 
     this.selectBBOX = () => {
       select.setActive(false)
@@ -182,11 +181,11 @@ class AreaController {
 
     this.selectBy = () => {
       if (this.group === 'all') {
-        updateSelection(vector.getSource().getFeatures())
+        this.updateSelection(vector.getSource().getFeatures())
         return
       }
       if (this.group === 'none') {
-        updateSelection([])
+        this.updateSelection([])
         this.group = ''
         return
       }
@@ -194,8 +193,30 @@ class AreaController {
       let selected = vector.getSource().getFeatures().filter(
         f => f.get('_group') === this.group
       )
-      updateSelection(selected)
+      this.updateSelection(selected)
     }
+  }
+
+  updateSelection (features, cumulative = false) {
+    this.$injector.get('$timeout')(() => {
+      if (!cumulative) this.collection.clear()
+      const uniques = this.collection.getArray().concat(features).filter(
+        (item, index, self) => index === self.indexOf(item)
+      )
+      this.collection.clear()
+      this.collection.extend(uniques)
+      this.ids = uniques.map(f => f.getId())
+      features.map(highlight)
+      this.collection.getArray().sort(
+        (a, b) => a.get('_label').localeCompare(b.get('_label'))
+      )
+    })
+  }
+
+  removeFromSelection (feature) {
+    highlight(feature)
+    this.collection.remove(feature)
+    this.ids = this.collection.getArray().map(f => f.getId())
   }
 
   save () {
@@ -208,15 +229,49 @@ class AreaController {
       flash.create('success', this.i18n.updated)
     }, flash.create.bind(flash, 'danger', this.i18n.error))
   }
+
+  export () {
+    const a = document.createElement('a')
+    a.href = window.URL.createObjectURL(new Blob(
+      [ this.ids.join('\n') ],
+      { type: 'text/csv' }
+    ))
+    a.download = 'export.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
+  import () {
+    const fileInput = document.createElement('input')
+    const reader = new window.FileReader()
+    fileInput.type = 'file'
+    fileInput.accept = 'text/csv'
+    this.ids = []
+    this.collection.clear()
+    reader.onload = () => this.$scope.$apply(() => {
+      reader.result.split('\n').forEach(line => {
+        const [id] = line.split(/,|;/)
+        let f = this.source.getFeatureById(id)
+        if (!f) return
+        this.collection.push(highlight(f))
+        this.ids.push(id)
+      })
+    })
+    fileInput.addEventListener(
+      'change',
+      () => reader.readAsBinaryString(fileInput.files[0]))
+    fileInput.click()
+  }
 }
 
-angular.module('manager')
-  .component('areas', {
-    bindings: {
-      item: '=',
-      callback: '='
-    },
-    controller: AreaController,
-    controllerAs: 'area',
-    templateUrl: 'components/area/area.tpl.html'
-  })
+angular.module('manager').component('areas', {
+  bindings: {
+    readonly: '=',
+    item: '=',
+    callback: '='
+  },
+  controller: AreaController,
+  controllerAs: 'area',
+  templateUrl: 'components/area/area.tpl.html'
+})
