@@ -1,6 +1,8 @@
 FROM georchestra/database
 
-ENV DEBIAN_FRONTEND noninterative
+ENV DEBIAN_FRONTEND=noninteractive \
+    POSTGRES_USER=georchestra
+
 ENV TERM linux
 
 RUN echo Europe/Paris | tee /etc/timezone
@@ -19,5 +21,5 @@ ADD start.sh /docker-entrypoint-initdb.d/
 CMD ["postgres"]
 
 HEALTHCHECK --interval=30s --timeout=30s \
-  CMD pg_isready -U postgres
+  CMD pg_isready -U $POSTGRES_USER
 
