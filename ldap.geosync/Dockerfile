@@ -8,23 +8,32 @@ ENV OPENLDAP_VERSION 2.4.44
 ENV RUN_AS_UID 101
 ENV RUN_AS_GID 101
 
+# set timezone
+RUN echo $TZ > /etc/timezone && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata && \
+    rm /etc/localtime && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
+
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        slapd=${OPENLDAP_VERSION}* && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+        slapd=${OPENLDAP_VERSION}*
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
 
 RUN mv /etc/ldap /etc/ldap.dist
 
 COPY docker/modules/ /etc/ldap.dist/modules
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y ldap-utils procps && \
-    rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ldap-utils procps
+#    rm -rf /var/lib/apt/lists/*
 
 # add packages for geosync
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y python python-ldap cron sasl2-bin && \
+#RUN apt-get update && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python python-ldap cron sasl2-bin && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 USER openldap
