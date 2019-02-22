@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y \
     libsaxonb-java \
     dbview \
     owncloud-client-cmd \
-    less vim colordiff openssh-client \
+#    less vim colordiff openssh-client \
  && rm -rf /var/lib/apt/lists/*
 
 # bug de owncloud-client-cmd qui est livré sans sync-exclude.lst
