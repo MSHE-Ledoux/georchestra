@@ -35,15 +35,20 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ldap-utils procps
 #RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python python-ldap cron sasl2-bin && \
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python python-ldap cron
 
+# bug... sasl2-bin ne peut plus être installé en même temps que les autres paquets
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y sasl2-bin && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# prepare georchestra users
 USER openldap
 ADD groupofmembers.ldif /etc/ldap.dist/modules/
 ADD docker/indexes.ldif /tmp/
 ADD memberof.ldif /tmp/
 ADD georchestra.ldif /tmp/
+
+# change default testadmin password
+ADD testadmin.ldif /tmp/
 
 # prepare entrypoint
 USER root
