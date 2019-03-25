@@ -1,4 +1,4 @@
-FROM georchestra/geoserver
+FROM georchestra/geoserver:18.06
 
 ENV XMS=1536M XMX=8G
 

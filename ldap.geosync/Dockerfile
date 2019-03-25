@@ -32,7 +32,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ldap-utils procps
 
 # add packages for geosync
 #RUN apt-get update && \
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python python-ldap cron sasl2-bin && \
+#RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python python-ldap cron sasl2-bin && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python python-ldap cron
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y sasl2-bin && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

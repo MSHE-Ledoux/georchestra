@@ -1,4 +1,4 @@
-FROM georchestra/database
+FROM georchestra/database:latest
 
 ENV DEBIAN_FRONTEND=noninteractive \
     POSTGRES_USER=georchestra
