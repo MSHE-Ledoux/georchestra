@@ -30,6 +30,11 @@ if [ ! -f /etc/ldap/slapd.d/initialized ]; then
         fi
     done
 
+    # <geosync>
+    echo "Adding olcSaslHost in ldap"
+    ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/LDAP/cn-config.ldif
+    # </geosync>
+
     echo "Populating LDAP tree..."
     sed -i 's/mdb/hdb/' /tmp/memberof.ldif
     ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/memberof.ldif
@@ -39,8 +44,25 @@ if [ ! -f /etc/ldap/slapd.d/initialized ]; then
         perl -p -i -e "s/georchestra.org/${SLAPD_DOMAIN}/"        /tmp/georchestra.ldif
         perl -p -i -e "s/dc=georchestra,dc=org/${dc_string}/"     /tmp/georchestra.ldif
         ldapadd -D "cn=admin,${dc_string}" -w "$SLAPD_PASSWORD" -f /tmp/georchestra.ldif
+
+        # <geosync>
+        echo "adding georchestra-xxxx users"
+        echo "setting georchestra-xxxx in admin groups"
+        for file in open-user.ldif rsct-user.ldif open-user-groups.ldif rsct-user-groups.ldif
+        do
+            perl -p -i -e "s/dc=georchestra,dc=org/${dc_string}/"     /tmp/LDAP/${file}
+            ldapadd -D"cn=admin,${dc_string}" -w "$SLAPD_PASSWORD" -f /tmp/LDAP/${file}
+        done
+        # </geosync>
     fi
     echo "Populating LDAP tree: OK"
+
+    # <geosync>
+    echo "Changing testadmin default password"
+    perl -p -i -e "s/dc=georchestra,dc=org/${dc_string}/"       /tmp/testadmin.ldif
+    perl -p -i -e "s/TESTADMIN_PASSWORD/${TESTADMIN_PASSWORD}/" /tmp/testadmin.ldif
+    ldapmodify -c -D "cn=admin,dc=georchestra,dc=org" -w "$SLAPD_PASSWORD" -f /tmp/testadmin.ldif
+    # </geosync>
 
     echo "Creating indexes..."
     ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/indexes.ldif

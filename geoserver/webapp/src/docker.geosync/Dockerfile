@@ -19,6 +19,8 @@ RUN java -jar "$JETTY_HOME/start.jar" --create-startd --add-to-start=servlets
 
 VOLUME [ "/mnt/geoserver_datadir", "/mnt/geoserver_geodata", "/mnt/geoserver_tiles", "/tmp", "/run/jetty" ]
 
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
+
 CMD ["sh", "-c", "exec java -Djava.io.tmpdir=/tmp/jetty \
 -Dgeofence-ovr=file:/etc/georchestra/geoserver/geofence/geofence-datasource-ovr.properties \
 -DGEOSERVER_DATA_DIR=/mnt/geoserver_datadir \
